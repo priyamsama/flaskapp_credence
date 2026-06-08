@@ -531,6 +531,7 @@ def edit_sample(sample_id):
 
                 flash('Sample updated successfully.', 'success')
                 return redirect(url_for('sample_update'))
+            
             except IntegrityError:
                 flash('The selected patient is invalid ! ','error')
                 patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
