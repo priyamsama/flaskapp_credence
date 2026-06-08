@@ -398,88 +398,80 @@ def sample_update():
         'referring_doctor': 'Referring Doctor',
         'referring_hospital': 'Referring Hospital',
     }
+    def get_dropdown_data():
+        samples = fetch_all("""
+            SELECT s.sample_id, p.patient_name
+            FROM samples s
+            JOIN patients p ON p.patient_id = s.patient_id
+            ORDER BY s.sample_id
+        """)
+        patients = fetch_all("""
+            SELECT patient_id, patient_name
+            FROM patients
+            ORDER BY patient_id
+        """)
+        return samples, patients
+
 
     if request.method == 'POST':
         sample_id = request.form.get('sample_id', '').strip().upper()
         update_field = request.form.get('update_field', '').strip()
         update_value = request.form.get('update_value', '').strip()
 
-        def render_error(msg):
-            flash(msg, 'error')
-            sample_ids = fetch_all("""
-                SELECT s.sample_id, p.patient_name
-                FROM samples s
-                JOIN patients p ON p.patient_id = s.patient_id
-                ORDER BY s.sample_id
-            """)
-            patient_ids = fetch_all("""
-                SELECT patient_id, patient_name
-                FROM patients
-                ORDER BY patient_id
-            """)
-            return render_template(
-                'sample_update.html',
-                sample_fields=sample_fields,
-                sample_ids=sample_ids,
-                patient_ids=patient_ids,
-                sample_id=sample_id,
-                update_field=update_field,
-                update_value=update_value
-            )
-
         if not sample_id or not update_field or not update_value:
-            return render_error('Sample ID, update field, and update value are required.')
+            flash(" All fields are required ! ",'error')
+        elif not re.match(r'^S\d{6}$',sample_id):
+            flash(" Sample ID must follow the format S000001...S999999",'error')
+        
+        else:
+            # Check if sample exists in database
+            sample_check = fetch_one('SELECT sample_id FROM samples WHERE sample_id = %s', (sample_id,))
+            if not sample_check:
+                flash('Sample was not found.', 'error')
+                
+            # Check patient validity if updating patient_id
+            elif update_field == 'patient_id' and not fetch_one('SELECT patient_id FROM patients WHERE patient_id = %s', (update_value,)):
+                flash('Selected patient does not exist.', 'error')
+                
+            # Check sample type dropdown values
+            elif update_field == 'sample_type' and update_value not in ['Blood', 'Swab', 'Tissue']:
+                flash('Sample type must be Blood, Swab, or Tissue.', 'error')
+                
+            # Check date
+            elif update_field == 'collection_date' and update_value > str(date.today()):
+                flash('Collection date cannot be in the future.', 'error')
+                
+            # Check that text fields aren't completely blanked out
+            elif update_field in ('referring_doctor', 'referring_hospital', 'test') and not update_value:
+                flash(f'{sample_fields[update_field]} cannot be empty.', 'error')
+                
+            else:
+                cur = mysql.connection.cursor()
+                cur.execute(
+                    f"UPDATE samples SET {update_field} = %s WHERE sample_id = %s",
+                    (update_value, sample_id)
+                )
+                mysql.connection.commit()
+                cur.close()
+                
+                flash(f'{sample_fields[update_field]} updated successfully.', 'success')
+                return redirect(url_for('sample_update'))
 
-        if not re.match(r'^S\d{6}$', sample_id):
-            return render_error('Sample ID must follow the format S000001, S000002 ... S999999.')
-
-        if update_field not in sample_fields:
-            return render_error('Invalid sample field selected.')
-
-        existing_sample = fetch_one('SELECT sample_id FROM samples WHERE sample_id = %s', (sample_id,))
-        if not existing_sample:
-            return render_error('Sample was not found.')
-
-        if update_field == 'patient_id':
-            patient = fetch_one('SELECT patient_id FROM patients WHERE patient_id = %s', (update_value,))
-            if not patient:
-                return render_error('Selected patient does not exist.')
-
-        if update_field == 'sample_type' and update_value not in ['Blood', 'Swab', 'Tissue']:
-            return render_error('Sample type must be Blood, Swab, or Tissue.')
-
-        if update_field == 'collection_date':
-            try:
-                if date.fromisoformat(update_value) > date.today():
-                    return render_error('Collection date cannot be in the future.')
-            except ValueError:
-                return render_error('Invalid date format. Use YYYY-MM-DD.')
-
-        if update_field in ('referring_doctor', 'referring_hospital', 'test'):
-            if not update_value:
-                return render_error(f'{sample_fields[update_field]} cannot be empty.')
-            
-        cur = mysql.connection.cursor()
-        cur.execute(
-            f"UPDATE samples SET {update_field} = %s WHERE sample_id = %s",
-            (update_value, sample_id)
+        # If any 'if' or 'elif' condition above was caught, it skips the database block 
+        # and lands down here to reload the page with the user's input intact.
+        sample_ids = fetch_all("SELECT s.sample_id, p.patient_name FROM samples s JOIN patients p ON p.patient_id = s.patient_id ORDER BY s.sample_id")
+        patient_ids = fetch_all("SELECT patient_id, patient_name FROM patients ORDER BY patient_id")
+        
+        return render_template(
+            'sample_update.html',
+            sample_fields=sample_fields, sample_ids=sample_ids, patient_ids=patient_ids,
+            sample_id=sample_id, update_field=update_field, update_value=update_value
         )
-        mysql.connection.commit()
-        cur.close()
-        flash(f'{sample_fields[update_field]} updated successfully.', 'success')
-        return redirect(url_for('sample_update'))
 
-    sample_ids = fetch_all("""
-        SELECT s.sample_id, p.patient_name
-        FROM samples s
-        JOIN patients p ON p.patient_id = s.patient_id
-        ORDER BY s.sample_id
-    """)
-    patient_ids = fetch_all("""
-        SELECT patient_id, patient_name
-        FROM patients
-        ORDER BY patient_id
-    """)
+    # 4. Handle standard GET request (initial page load)
+    sample_ids = fetch_all("SELECT s.sample_id, p.patient_name FROM samples s JOIN patients p ON p.patient_id = s.patient_id ORDER BY s.sample_id")
+    patient_ids = fetch_all("SELECT patient_id, patient_name FROM patients ORDER BY patient_id")
+    
     return render_template(
         'sample_update.html',
         sample_fields=sample_fields,
@@ -497,6 +489,7 @@ def edit_sample(sample_id):
         return redirect(url_for('sample_update'))
 
     if request.method == 'POST':
+        # getting form ddata 
         patient_id         = request.form['patient_id'].strip()
         sample_type        = request.form['sample_type'].strip()
         test               = request.form['test'].strip()
@@ -504,62 +497,51 @@ def edit_sample(sample_id):
         referring_doctor   = request.form['referring_doctor'].strip()
         referring_hospital = request.form['referring_hospital'].strip()
 
-        def render_error(msg):
-            flash(msg, 'error')
-            submitted = {
-                'sample_id': sample_id,
-                'patient_id': patient_id,
-                'sample_type': sample_type,
-                'test': test,
-                'collection_date': collection_date,
-                'referring_doctor': referring_doctor,
-                'referring_hospital': referring_hospital
-            }
+        submitted_sample={
+        'sample_id':sample_id,
+        'patient_id':patient_id,
+        'sample_type': sample_type,
+        'test': test,
+        'collection_date':collection_date,
+        'referring_doctor': referring_doctor,
+        'referring_hospital':referring_hospital
+        }
+        
+        
+        if not (patient_id and sample_id and test and collection_date and referring_doctor and referring_hospital):
+            flash("All fields are required !",'error')
             patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
-            return render_template(
-                'sample_register.html',
-                patients=patients,
-                sample=submitted,
-                mode='edit'
-            )
-
-        #  1. Required fields 
-        if not patient_id or not sample_type or not test or not collection_date or not referring_doctor or not referring_hospital:
-            return render_error('All fields are required.')
-
-        #  2. Sample type whitelist 
-        if sample_type not in ['Blood', 'Swab', 'Tissue']:
-            return render_error('Invalid sample type.')
-
-        #  3. Date not in the future 
-        from datetime import date
-        try:
-            if date.fromisoformat(collection_date) > date.today():
-                return render_error('Collection date cannot be in the future.')
-        except ValueError:
-            return render_error('Invalid date format.')
-
-        cur = mysql.connection.cursor()
-        try:
-            cur.execute("""
+            return render_template('sample_register.html',patients=patients,sample=submitted_sample, mode="edit")
+        elif collection_date > str(date.today()):
+            flash("Collection date cannot be in future ! ", 'error')
+            patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
+            return render_template('sample_register.html',patients=patients,sample=submitted_sample, mode="edit")
+        else:
+            
+            try:
+                cur = mysql.connection.cursor()
+                cur.execute("""
                 UPDATE samples
                 SET patient_id = %s, sample_type = %s, test = %s,
                     collection_date = %s, referring_doctor = %s, referring_hospital = %s
                 WHERE sample_id = %s
-            """, (patient_id, sample_type, test, collection_date, referring_doctor, referring_hospital, sample_id))
-            mysql.connection.commit()
-            flash('Sample updated successfully.', 'success')
-            return redirect(url_for('sample_update'))
-        except IntegrityError:
-            mysql.connection.rollback()
-            return render_error('The selected patient is invalid.')
-        finally:
-            cur.close()
+                """, (patient_id, sample_type, test, collection_date, referring_doctor, referring_hospital, sample_id))
+                mysql.connection.commit()
+                cur.close()
+
+                flash('Sample updated successfully.', 'success')
+                return redirect(url_for('sample_update'))
+            except IntegrityError:
+                flash('The selected patient is invalid ! ','error')
+                patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
+                return render_template('sample_register.html', patients=patients, sample=submitted_sample, mode='edit')
+
+            
     patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
     return render_template(
             'sample_register.html',
             patients=patients,
-            sample=selected_sample, # Passes existing data to populate the form
+            sample=selected_sample,
             mode='edit'
         )
 
