@@ -1,46 +1,128 @@
-{% extends "base.html" %}
-
-{% block title %}Reporting{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Reporting{% endblock %} {% block
+content %}
 
 <section class="form-panel">
-    <form method="POST" class="form-grid">
-        <label>
-            Report ID
-            <input type="text" name="report_id" value="{{ reporting.report_id if reporting else '' }}" {% if mode == 'edit' %}disabled{% else %}placeholder="e.g. P000001"{% endif %} required>
-        </label>
-        <br>
-        <label>
-            Patient ID
-            <input type="text" name="patient_id" value="{{ patient.patient_id if patient else '' }}" placeholder="e.g. John Doe" required>
-        </label>
-        <br>
-        <label>
-            Text
-            <input type="text" name="draft_text" value="{{ reporting.draft_text if reporting else '' }}" placeholder=" Write the comments on this..." required>
-        </label>
-        <br>
-        <label>
-            Gender
-            <select name="gender" required>
-                <option value="">Select gender</option>
-                {% for gender in ['Male', 'Female', 'Other'] %}
-                <option value="{{ gender }}" {% if patient and patient.gender == gender %}selected{% endif %}>{{ gender }}</option>
-                {% endfor %}
-            </select>
-        </label>
-        <br>
-    
-        <label class="full-width">
-            Contact Number
-            <input type="text" name="contact_number" value="{{ patient.contact_number if patient else '' }}" placeholder="e.g. 0712345601 (exactly 10 digits)" required>
-        </label>
-        <br>
-        <div class="button">
-            <button type="submit" >{{ 'Update Patient' if mode == 'edit' else 'Save Changes' if mode == 'edit' else 'Register Patient' }}</button>
-        </div>
-    </form>
+  <h2>{{ 'Edit Report' if mode == 'edit' else 'Create Report' }}</h2>
+
+  <form method="POST" class="form-grid">
+    <label>
+      Report ID
+      <input
+        type="text"
+        name="report_id"
+        value="{{ report.report_id if report else '' }}"
+        {%
+        if
+        mode=""
+        ="edit"
+        %}readonly{%
+        endif
+        %}
+        placeholder="e.g. R000001"
+        required
+      />
+    </label>
+
+    <br />
+
+    <label>
+      Patient ID
+      <select name="patient_id" required>
+        <option value="">Select Patient</option>
+
+        {% for patient in patients %}
+        <option
+          value="{{ patient.patient_id }}"
+          {%
+          if
+          report
+          and
+          report.patient_id=""
+          ="patient.patient_id"
+          %}
+          selected
+          {%
+          endif
+          %}
+        >
+          {{ patient.patient_id }} - {{ patient.patient_name }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <br />
+
+    <label class="full-width">
+      Draft Report
+      <textarea
+        name="draft_text"
+        rows="12"
+        placeholder="Write report findings here..."
+        required
+      >
+{{ report.draft_text if report else '' }}</textarea
+      >
+    </label>
+
+    <br />
+
+    <label class="full-width">
+      Comments
+      <textarea name="comments" rows="4" placeholder="Additional comments...">
+{{ report.comments if report else '' }}</textarea
+      >
+    </label>
+
+    <br />
+
+    <label>
+      Status
+      <select name="report_status">
+        <option
+          value="Pending"
+          {%
+          if
+          report
+          and
+          report.report_status=""
+          ="Pending"
+          %}
+          selected
+          {%
+          endif
+          %}
+        >
+          Pending
+        </option>
+
+        <option
+          value="Delivered"
+          {%
+          if
+          report
+          and
+          report.report_status=""
+          ="Delivered"
+          %}
+          selected
+          {%
+          endif
+          %}
+        >
+          Delivered
+        </option>
+      </select>
+    </label>
+
+    <br />
+
+    <div class="button">
+      <button type="submit">
+        {{ 'Update Report' if mode == 'edit' else 'Create Report' }}
+      </button>
+    </div>
+  </form>
 </section>
 
 {% endblock %}
