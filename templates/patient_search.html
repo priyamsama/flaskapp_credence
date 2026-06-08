@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Search Patients{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Patient Module</p>
+        <h1>Search Patients</h1>
+    </div>
+    <a class="button secondary" href="{{ url_for('patient') }}">Back to Patients</a>
+</section>
+
+<section class="form-panel">
+    <form method="POST" class="search-form">
+        <input type="search" name="query" value="{{ query }}" placeholder="Search by patient ID, name, or contact number...">
+        <button type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Search</span>
+        </button>
+    </form>
+</section>
+
+{% if searched %}
+<section class="panel">
+    <div class="panel-heading">
+        <h2>Search Results</h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Contact</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in results %}
+            <tr>
+                <td><a class="table-link" href="{{ url_for('edit_patient', patient_id=patient.patient_id) }}">{{ patient.patient_id }}</a></td>
+                <td><strong>{{ patient.patient_name }}</strong></td>
+                <td>{{ patient.age }}</td>
+                <td>{{ patient.gender }}</td>
+                <td>{{ patient.contact_number }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="empty">No matching patients found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endif %}
+{% endblock %}

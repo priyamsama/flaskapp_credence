@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Samples{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Sample Module</p>
+        <h1>{{ 'Update Sample' if mode == 'edit' else 'Register Sample' }}</h1>
+    </div>
+    {% if mode == 'edit' %}
+    <a class="button secondary" href="{{ url_for('sample_update') }}">Back to Sample List</a>
+    {% else %}
+    <a class="button secondary" href="{{ url_for('sample') }}">Back to Samples</a>
+    {% endif %}
+</section>
+
+<section class="form-panel">
+    <form method="POST" class="form-grid">
+        <label>
+            Sample ID
+            <input type="text" name="sample_id" value="{{ sample.sample_id if sample else '' }}" {% if mode == 'edit' %}disabled{% else %}placeholder="e.g. S000001"{% endif %} required>
+        </label>
+
+        <label>
+            Patient
+            <select name="patient_id" required>
+                <option value="">Select patient</option>
+                {% for patient in patients %}
+                <option value="{{ patient.patient_id }}" {% if sample and sample.patient_id == patient.patient_id %}selected{% endif %}>{{ patient.patient_name }} ({{ patient.patient_id }})</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Sample Type
+            <select name="sample_type" required>
+                <option value="">Select type</option>
+                {% for sample_type in ['Blood', 'Swab', 'Tissue'] %}
+                <option value="{{ sample_type }}" {% if sample and sample.sample_type == sample_type %}selected{% endif %}>{{ sample_type }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Collection Date
+            <input type="date" name="collection_date" max="{{today}}" value="{{ sample.collection_date if sample else '' }}" required>
+        </label>
+
+        <label class="full-width">
+            Test Name
+            <input type="text" name="test" placeholder="e.g. Complete Blood Count (CBC)" value="{{ sample.test if sample else '' }}" required>
+        </label>
+
+        <label>
+            Referring Doctor
+            <input type="text" id="referring_doctor" name="referring_doctor" placeholder="e.g. Dr. Arthur Smith" value="{{ sample.referring_doctor if sample else '' }}" required>
+        </label>
+        
+        <label>
+            Referring Hospital
+            <input type="text" id="referring_hospital" name="referring_hospital" placeholder="e.g. General Hospital" value="{{ sample.referring_hospital if sample else '' }}" required>
+        </label>
+            
+        <div class="form-actions">
+            <button type="submit">{{ 'Update Sample' if mode == 'edit' else 'Register Sample' }}</button>
+        </div>
+    </form>
+</section>
+
+{% endblock %}

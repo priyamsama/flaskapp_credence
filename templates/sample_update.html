@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Update Samples{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Sample Module</p>
+        <h1>Update Sample Details</h1>
+    </div>
+    <a class="button secondary" href="{{ url_for('sample') }}">Back to Samples</a>
+</section>
+
+<section class="form-panel" style="max-width: 600px;">
+    <div class="panel-heading">
+        <h2>Select Field to Update</h2>
+    </div>
+    <form method="POST" class="form-grid" style="grid-template-columns: 1fr; padding: 24px;">
+        <label>
+            Sample ID
+            <input type="text" name="sample_id" list="sample-id-list" value="{{ sample_id or '' }}" placeholder="Enter Sample ID" required>
+            <datalist id="sample-id-list">
+                {% for sample in sample_ids %}
+                <option value="{{ sample.sample_id }}">{{ sample.patient_name }}</option>
+                {% endfor %}
+            </datalist>
+        </label>
+
+        <label>
+            Field to Update
+            <select name="update_field" required>
+                <option value="">Select field to update</option>
+                {% for field, label in sample_fields.items() %}
+                <option value="{{ field }}" {% if update_field == field %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            New Value
+            <input type="text" id="value-input-text" name="update_value" value="{{ update_value or '' }}" placeholder="Enter the new value" required>
+            
+            <input type="text" id="value-input-patient" name="update_value" list="patient-id-list" value="{{ update_value or '' }}" placeholder="Select Patient ID or Type Name" style="display: none;" disabled required>
+            <datalist id="patient-id-list">
+                {% for patient in patient_ids %}
+                <option value="{{ patient.patient_id }}">{{ patient.patient_name }}</option>
+                {% endfor %}
+            </datalist>
+
+            <select id="value-input-type" name="update_value" style="display: none;" disabled required>
+                <option value="">Select sample type</option>
+                <option value="Blood" {% if update_value == 'Blood' %}selected{% endif %}>Blood</option>
+                <option value="Swab" {% if update_value == 'Swab' %}selected{% endif %}>Swab</option>
+                <option value="Tissue" {% if update_value == 'Tissue' %}selected{% endif %}>Tissue</option>
+            </select>
+
+            <input type="date" id="value-input-date" name="update_value" value="{{ update_value or '' }}" style="display: none;" disabled required>
+        </label>
+
+        <div class="form-actions" style="margin-top: 10px;">
+            <button type="submit">Update Details</button>
+        </div>
+    </form>
+</section>
+
+<script>
+    const fieldSelect = document.querySelector('select[name="update_field"]');
+    const textInput = document.getElementById('value-input-text');
+    const patientInput = document.getElementById('value-input-patient');
+    const typeInput = document.getElementById('value-input-type');
+    const dateInput = document.getElementById('value-input-date');
+
+    // Set maximum date to today
+    dateInput.max = new Date().toISOString().split('T')[0];
+
+    function updateInputs() {
+        const selectedField = fieldSelect.value;
+        
+        // Hide and disable all first
+        [textInput, patientInput, typeInput, dateInput].forEach(input => {
+            input.style.display = 'none';
+            input.disabled = true;
+        });
+
+        if (selectedField === 'sample_type') {
+            typeInput.style.display = 'block';
+            typeInput.disabled = false;
+        } else if (selectedField === 'collection_date') {
+            dateInput.style.display = 'block';
+            dateInput.disabled = false;
+        } else if (selectedField === 'patient_id') {
+            patientInput.style.display = 'block';
+            patientInput.disabled = false;
+        } else {
+            textInput.style.display = 'block';
+            textInput.disabled = false;
+            textInput.placeholder = "Enter the new value";
+        }
+    }
+
+    fieldSelect.addEventListener('change', updateInputs);
+    document.addEventListener('DOMContentLoaded', updateInputs);
+</script>
+{% endblock %}

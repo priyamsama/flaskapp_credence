@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<section class="login-card">
+    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <div class="module-icon" style="margin-bottom: 0; background-color: var(--primary-light); color: var(--primary); width: 56px; height: 56px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+    </div>
+    <h1>Flask App Login</h1>
+    <p>Enter your credentials to access the patient sample management system.</p>
+
+    <form method="POST">
+        <label>
+            Username
+            <input type="text" name="username" placeholder="e.g. admin" required autofocus>
+        </label>
+
+        <label>
+            Password
+            <input type="password" name="password" placeholder="••••••••" required>
+        </label>
+
+        <button type="submit">
+            <span>Login</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+    </form>
+</section>
+{% endblock %}

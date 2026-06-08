@@ -1,0 +1,77 @@
+
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Welcome, {{ session.get('username') }}</p>
+        <h1>Dashboard</h1>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <div class="stat-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <span>Total Patients</span>
+                <strong>{{ stats.patients }}</strong>
+            </div>
+            <div class="module-icon" style="margin-bottom: 0; width: 48px; height: 48px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <span>Total Samples</span>
+                <strong>{{ stats.samples }}</strong>
+            </div>
+            <div class="module-icon" style="margin-bottom: 0; width: 48px; height: 48px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12"/><path d="M8 3v4.3a4 4 0 0 1-.8 2.4L4.5 14A4 4 0 0 0 8 20h8a4 4 0 0 0 3.5-6l-2.7-4.3a4 4 0 0 1-.8-2.4V3"/><path d="M5.5 14h13"/></svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-heading">
+        <h2>Recent Samples</h2>
+        <a class="button secondary" href="{{ url_for('sample') }}">Open Samples</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Sample ID</th>
+                <th>Patient</th>
+                <th>Type</th>
+                <th>Collection Date</th>
+                <th>Test</th>
+                <th>Referring Doctor</th>
+                <th>Referring Hospital</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sample in recent_samples %}
+            <tr>
+                <td><strong class="table-link">{{ sample.sample_id }}</strong></td>
+                <td>{{ sample.patient_name }} ({{ sample.patient_id }})</td>
+                <td>
+                    <span class="badge badge-{{ sample.sample_type|lower }}">{{ sample.sample_type }}</span>
+                </td>
+                <td>{{ sample.collection_date }}</td>
+                <td>{{ sample.test }}</td>
+                <td>{{ sample.referring_doctor }}</td>
+                <td>{{ sample.referring_hospital }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="empty">No samples registered yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

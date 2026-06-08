@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Search Samples{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Sample Module</p>
+        <h1>Search Samples</h1>
+    </div>
+    <a class="button secondary" href="{{ url_for('sample') }}">Back to Samples</a>
+</section>
+
+<section class="panel">
+    <form method="POST" class="search-filter-grid">
+        <label for="search-box">
+            Search Keyword
+            <input type="search" id="search-box" name="query" value="{{ query }}" placeholder="Search by ID, patient, type...">
+        </label>
+
+        <!-- Date Selection Field -->
+        <label for="start-date">
+            Start Date
+            <input type="date" id="start-date" name="start_date" value="{{ start_date }}">
+        </label>
+
+        <!-- Date Selection Field -->
+        <label for="end-date">
+            End Date
+            <input type="date" id="end-date" name="end_date" value="{{ end_date }}">
+        </label>
+
+        <!-- Submit Button -->
+        <button type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Search</span>
+        </button>
+    </form>
+</section>
+
+{% if searched %}
+<section class="panel">
+    <div class="panel-heading">
+        <h2>Search Results</h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Sample ID</th>
+                <th>Patient</th>
+                <th>Type</th>
+                <th>Collection Date</th>
+                <th>Test</th>
+                <th>Referring Doctor</th>
+                <th>Referring Hospital</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sample in results %}
+            <tr>
+                <td><a class="table-link" href="{{ url_for('edit_sample', sample_id=sample.sample_id) }}">{{ sample.sample_id }}</a></td>
+                <td><strong>{{ sample.patient_name }}</strong> ({{ sample.patient_id }})</td>
+                <td>
+                    <span class="badge badge-{{ sample.sample_type|lower }}">{{ sample.sample_type }}</span>
+                </td>
+                <td>{{ sample.collection_date }}</td>
+                <td>{{ sample.test }}</td>
+                <td>{{ sample.referring_doctor }}</td>
+                <td>{{ sample.referring_hospital }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="empty">No matching samples found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endif %}
+{% endblock %}

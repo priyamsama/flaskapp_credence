@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Update Patients{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Patient Module</p>
+        <h1>Update Patient Details</h1>
+    </div>
+    <a class="button secondary" href="{{ url_for('patient') }}">Back to Patients</a>
+</section>
+
+<section class="form-panel" style="max-width: 600px;">
+    <div class="panel-heading">
+        <h2>Select Field to Update</h2>
+    </div>
+    <form method="POST" class="form-grid" style="grid-template-columns: 1fr; padding: 24px;">
+        <label>
+            Patient ID
+            <input type="text" name="patient_id" list="patient-id-list" value="{{ patient_id or '' }}" placeholder="Enter Patient ID or select Name" required>
+            <datalist id="patient-id-list">
+                {% for patient in patient_ids %}
+                <option value="{{ patient.patient_id }}">{{ patient.patient_name }}</option>
+                {% endfor %}
+            </datalist>
+        </label>
+
+        <label>
+            Field to Update
+            <select name="update_field" required>
+                <option value="">Select field to update</option>
+                {% for field, label in patient_fields.items() %}
+                <option value="{{ field }}" {% if update_field == field %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            New Value
+            <input type="text" id="value-input-text" name="update_value" value="{{ update_value or '' }}" placeholder="Enter the new value" required>
+            <input type="number" id="value-input-age" name="update_value" min="0" max="120" placeholder="Enter age (0-120)" style="display: none;" disabled required>
+            <select id="value-input-gender" name="update_value" style="display: none;" disabled required>
+                <option value="">Select gender</option>
+                <option value="Male" {% if update_value == 'Male' %}selected{% endif %}>Male</option>
+                <option value="Female" {% if update_value == 'Female' %}selected{% endif %}>Female</option>
+                <option value="Other" {% if update_value == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+        </label>
+
+        <div class="form-actions" style="margin-top: 10px;">
+            <button type="submit">Update Details</button>
+        </div>
+    </form>
+</section>
+
+<script>
+    const fieldSelect = document.querySelector('select[name="update_field"]');
+    const textInput = document.getElementById('value-input-text');
+    const ageInput = document.getElementById('value-input-age');
+    const genderInput = document.getElementById('value-input-gender');
+
+    function updateInputs() {
+        const selectedField = fieldSelect.value;
+        
+        // Hide and disable all first
+        [textInput, ageInput, genderInput].forEach(input => {
+            input.style.display = 'none';
+            input.disabled = true;
+        });
+
+        if (selectedField === 'gender') {
+            genderInput.style.display = 'block';
+            genderInput.disabled = false;
+        } else if (selectedField === 'age') {
+            ageInput.style.display = 'block';
+            ageInput.disabled = false;
+            if ("{{ update_value or '' }}" && !isNaN("{{ update_value or '' }}")) {
+                ageInput.value = "{{ update_value or '' }}";
+            }
+        } else {
+            textInput.style.display = 'block';
+            textInput.disabled = false;
+            if (selectedField === 'contact_number') {
+                textInput.placeholder = "Enter 10-digit contact number";
+            } else {
+                textInput.placeholder = "Enter the new value";
+            }
+        }
+    }
+
+    fieldSelect.addEventListener('change', updateInputs);
+    document.addEventListener('DOMContentLoaded', updateInputs);
+</script>
+{% endblock %}
