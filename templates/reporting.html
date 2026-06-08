@@ -7,20 +7,20 @@
 <section class="form-panel">
     <form method="POST" class="form-grid">
         <label>
+            Report ID
+            <input type="text" name="report_id" value="{{ reporting.report_id if reporting else '' }}" {% if mode == 'edit' %}disabled{% else %}placeholder="e.g. P000001"{% endif %} required>
+        </label>
+        <br>
+        <label>
             Patient ID
-            <input type="text" name="patient_id" value="{{ patient.patient_id if patient else '' }}" {% if mode == 'edit' %}disabled{% else %}placeholder="e.g. P000001"{% endif %} required>
+            <input type="text" name="patient_id" value="{{ patient.patient_id if patient else '' }}" placeholder="e.g. John Doe" required>
         </label>
-
+        <br>
         <label>
-            Patient Name
-            <input type="text" name="patient_name" value="{{ patient.patient_name if patient else '' }}" placeholder="e.g. John Doe" required>
+            Text
+            <input type="text" name="draft_text" value="{{ reporting.draft_text if reporting else '' }}" placeholder=" Write the comments on this..." required>
         </label>
-
-        <label>
-            Age
-            <input type="number" name="age" min="0" max="120" value="{{ patient.age if patient else '' }}" placeholder="e.g. 30" required>
-        </label>
-
+        <br>
         <label>
             Gender
             <select name="gender" required>
@@ -30,14 +30,17 @@
                 {% endfor %}
             </select>
         </label>
-
+        <br>
+    
         <label class="full-width">
             Contact Number
             <input type="text" name="contact_number" value="{{ patient.contact_number if patient else '' }}" placeholder="e.g. 0712345601 (exactly 10 digits)" required>
         </label>
-
-        <div class="form-actions">
-            <button type="submit">{{ 'Update Patient' if mode == 'edit' else 'Save Changes' if mode == 'edit' else 'Register Patient' }}</button>
+        <br>
+        <div class="button">
+            <button type="submit" >{{ 'Update Patient' if mode == 'edit' else 'Save Changes' if mode == 'edit' else 'Register Patient' }}</button>
         </div>
     </form>
 </section>
+
+{% endblock %}

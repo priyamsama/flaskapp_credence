@@ -555,7 +555,13 @@ def edit_sample(sample_id):
             return render_error('The selected patient is invalid.')
         finally:
             cur.close()
-
+    patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
+    return render_template(
+            'sample_register.html',
+            patients=patients,
+            sample=selected_sample, # Passes existing data to populate the form
+            mode='edit'
+        )
 
 @app.route('/patient/search', methods=['GET', 'POST'])
 @login_required
