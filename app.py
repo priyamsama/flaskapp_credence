@@ -647,16 +647,13 @@ def sample_search():
         searched=searched
     )
 
-
-@app.route('/search')
-@login_required
-def search():
-    return redirect(url_for('sample_search'))
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
 @app.route('/reporting')
 @login_required
 def reporting():
     return render_template('reporting.html')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+

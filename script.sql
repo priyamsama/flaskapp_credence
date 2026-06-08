@@ -24,6 +24,24 @@ ALTER TABLE samples
     ADD COLUMN referring_doctor VARCHAR(100) NOT NULL,
     ADD COLUMN referring_hospital VARCHAR(150) NOT NULL;
 
+CREATE TABLE patient_report(
+    report_id VARCHAR (20) PRIMARY KEY,
+    patient_id VARCHAR(20) NOT NULL,
+    draft_text TEXT,
+    final_text TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    signed_by VARCHAR(100) NULL,  
+    signature_path VARCHAR(255) NULL,
+    report_status ENUM ('Delivered','Pending') NOT NULL;
+    CONSTRAINT fk_report_patient
+        FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
+
+
 
 INSERT INTO patients
 (patient_id, patient_name, age, gender, contact_number)
