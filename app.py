@@ -636,6 +636,12 @@ def sample_search():
 
 @app.route('/report')
 @login_required
+def report():
+    return render_template('report_menu.html')
+
+
+@app.route('/report')
+@login_required
 def reporting():
     cursor = mysql.connection.cursor(DictCursor)
     cursor.execute('''
@@ -750,6 +756,71 @@ def edit_report(report_id):
         patients=patients,
         report=report,
         mode='edit'
+    )
+@app.route('/report/search', methods=['GET', 'POST'])
+@login_required
+def search_report():
+    results = []
+    report_id = ''
+    patient_id = ''
+    created_at = ''
+    searched = False
+
+    if request.method == 'POST':
+        searched = True
+        report_id = request.form.get('report_id', '').strip()
+        patient_id = request.form.get('patient_id', '').strip()
+        created_at = request.form.get('created_at', '').strip()
+        
+        sql = """
+            SELECT 
+                pr.report_id,
+                p.patient_id,
+                p.patient_name,
+                s.sample_type,
+                s.collection_date,
+                s.test,
+                s.referring_doctor,
+                s.referring_hospital
+            FROM patient_report pr
+            INNER JOIN patients p ON pr.patient_id = p.patient_id
+            INNER JOIN samples s ON p.patient_id = s.patient_id
+        """
+        
+        # 2. Track conditions dynamically
+        conditions = []
+        params = []
+
+        if report_id:
+            conditions.append("report_id LIKE %s")
+            params.append(f'%{report_id}%')
+
+        if patient_id:
+            conditions.append("patient_id LIKE %s")
+            params.append(f'%{patient_id}%')
+
+        if created_at:
+            conditions.append("DATE(created_at) = %s")
+            params.append(created_at)
+
+        # 3. If any search fields were filled out, combine them cleanly with 'AND'
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+            
+        cur = mysql.connection.cursor(DictCursor)
+        
+        # 4. Now params will match the exact number of %s in the final query string!
+        cur.execute(sql, params)
+        results = cur.fetchall()
+        cur.close() 
+        
+    return render_template(
+        'report_search.html',
+        results=results,
+        report_id=report_id,
+        patient_id=patient_id,
+        created_at=created_at,
+        searched=searched
     )
 
 if __name__ == '__main__':
