@@ -792,27 +792,20 @@ def search_report():
         params = []
 
         if report_id:
-            conditions.append("report_id LIKE %s")
+            conditions.append("pr.report_id LIKE %s")
             params.append(f'%{report_id}%')
 
         if patient_id:
-            conditions.append("patient_id LIKE %s")
+            conditions.append("p.patient_id LIKE %s")
             params.append(f'%{patient_id}%')
 
         if created_at:
-            conditions.append("DATE(created_at) = %s")
+            conditions.append("DATE(pr.created_at) = %s")
             params.append(created_at)
 
-        # 3. If any search fields were filled out, combine them cleanly with 'AND'
         if conditions:
             sql += " WHERE " + " AND ".join(conditions)
             
-        cur = mysql.connection.cursor(DictCursor)
-        
-        # 4. Now params will match the exact number of %s in the final query string!
-        cur.execute(sql, params)
-        results = cur.fetchall()
-        cur.close() 
         
     return render_template(
         'report_search.html',

@@ -40,17 +40,6 @@
         <br>
 
         <label class="full-width">
-            Draft Report
-            <textarea
-                name="draft_text"
-                rows="12"
-                placeholder="Write report findings here..."
-                required>{{ report.draft_text if report else '' }}</textarea>
-        </label>
-
-        <br>
-
-        <label class="full-width">
             Comments
             <textarea
                 name="comments"
@@ -58,32 +47,20 @@
                 placeholder="Additional comments...">{{ report.comments if report else '' }}</textarea>
         </label>
 
-        <label>
-            Status
-            <select name="report_status">
-                <option value="Pending"
-                    {% if report and report.report_status == 'Pending' %}
-                    selected
-                    {% endif %}>
-                    Pending
-                </option>
+        
 
-                <option value="Delivered"
-                    {% if report and report.report_status == 'Delivered' %}
-                    selected
-                    {% endif %}>
-                    Delivered
-                </option>
-            </select>
-        </label>
-
-        <br>
-
-        <div class="button">
-            <button type="submit">
-                {{ 'Update Report' if mode == 'edit' else 'Create Report' }}
+        <div >
+            <button type="submit" class="button_1">
+                {{ 'Update Report' if mode == 'edit' else 'Create Draft Report' }}
             </button>
         </div>
+        <div>
+            <button type="submit" class="button_2">
+                {{ 'Update Report' if mode == 'edit' else 'Create Final Report' }}
+            </button>
+        </div>
+        
+        
 
     </form>
 

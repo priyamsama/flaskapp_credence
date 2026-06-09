@@ -393,7 +393,7 @@ input::placeholder {
 input:focus,
 select:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 0 3px rgba(77, 79, 177, 0.15);
     flex: 1;
 }
 
@@ -406,8 +406,25 @@ select:focus {
 
 /* Buttons */
 button,
-.button {
-    background-color: var(--primary);
+.button_1{
+    background-color: rgb(43, 65, 154);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-white);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    height: 44px;
+    padding: 0 20px;
+    transition: var(--transition);
+    gap: 8px;
+}
+.button_2{
+    background-color: rgb(185, 91, 91);
     border: none;
     border-radius: var(--radius-sm);
     color: var(--text-white);
@@ -425,14 +442,19 @@ button,
 }
 
 button:hover,
-.button:hover {
-    background-color: var(--primary-hover);
-    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+.button_1:hover {
+    background-color: rgb(115, 212, 106);
+    box-shadow: 0 2px 8px rgba(104, 208, 118, 0.25);
+}
+
+.button_2:hover {
+    background-color: rgb(115, 212, 106);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
 }
 
 .button.secondary {
     background-color: #f1f5f9;
-    color: #334155;
+    color: #4f9d78;
     border: 1px solid #e2e8f0;
 }
 
