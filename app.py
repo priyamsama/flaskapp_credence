@@ -2,7 +2,9 @@ from datetime import date
 from functools import wraps
 import os
 import re
-
+from flask import render_template, make_response
+from weasyprint import HTML
+import tempfile
 from dotenv import load_dotenv
 from flask import Flask, flash, render_template, redirect, request, session, url_for
 from flask_mysqldb import MySQL
@@ -815,6 +817,46 @@ def search_report():
         created_at=created_at,
         searched=searched
     )
+
+
+@app.route('/report/download/<report_id>', methods=['POST'])
+@login_required
+def draft_print(report_id):
+    patient_id = request.form['patient_id']
+    draft_text = request.form['draft_text']
+    comments = request.form['comments']
+    status = request.form['report_status']
+
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        UPDATE patient_report
+        SET patient_id = %s, draft_text = %s, comments = %s, report_status = %s, update_at = NOW()
+        WHERE report_id = %s
+    """, (patient_id, draft_text, comments, status, report_id))
+    mysql.connection.commit()
+    cur.close()
+
+    # Render HTML
+    html = render_template(
+        'report_pdf.html',
+        report_id=report_id,
+        patient_id=patient_id,
+        draft_text=draft_text,
+        comments=comments,
+        status=status
+    )
+
+    # Generate PDF
+    pdf = HTML(string=html).write_pdf()
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=report_{report_id}.pdf'
+
+    return response
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
