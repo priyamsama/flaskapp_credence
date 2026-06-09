@@ -39,6 +39,9 @@ CREATE TABLE patient_report(
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+ALTER TABLE patient_report
+ADD comments TEXT;
+
 
 
 

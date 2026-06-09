@@ -148,7 +148,7 @@ nav a.active {
 /* Page Headers */
 .page-header {
     display: flex;
-    align-items: center;
+    align-items: left;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 32px;
@@ -161,6 +161,8 @@ nav a.active {
     letter-spacing: 0.05em;
     margin-bottom: 6px;
     text-transform: uppercase;
+    text-align: left;
+
 }
 
 h1 {
@@ -349,6 +351,7 @@ h2 {
     .form-grid .full-width,
     .form-grid .form-actions {
         grid-column: span 2;
+        box-sizing: border-box;
     }
 }
 

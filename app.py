@@ -278,7 +278,7 @@ def edit_patient(patient_id):
             SET patient_name = %s, age = %s, gender = %s, contact_number = %s
             WHERE patient_id = %s
         """, (
-            request.form['patient_name'].strip(), #strip removes the extra spaces
+            request.form['patient_name'].strip(),
             request.form['age'],
             request.form['gender'],
             request.form['contact_number'].strip(),
@@ -457,8 +457,6 @@ def sample_update():
                 flash(f'{sample_fields[update_field]} updated successfully.', 'success')
                 return redirect(url_for('sample_update'))
 
-        # If any 'if' or 'elif' condition above was caught, it skips the database block 
-        # and lands down here to reload the page with the user's input intact.
         sample_ids = fetch_all("SELECT s.sample_id, p.patient_name FROM samples s JOIN patients p ON p.patient_id = s.patient_id ORDER BY s.sample_id")
         patient_ids = fetch_all("SELECT patient_id, patient_name FROM patients ORDER BY patient_id")
         
@@ -636,11 +634,123 @@ def sample_search():
         searched=searched
     )
 
-@app.route('/reporting')
+@app.route('/report')
 @login_required
 def reporting():
-    return render_template('reporting.html')
+    cursor = mysql.connection.cursor(DictCursor)
+    cursor.execute('''
+        SELECT r.report_id, r.patient_id, p.patient_name, r.report_status,
+               r.created_at, r.update_at
+        FROM patient_report r
+        JOIN patients p ON r.patient_id = p.patient_id
+        ORDER BY r.update_at DESC
+    ''')
+    reports = cursor.fetchall()
+    cursor.close()
+    return render_template('report_list.html', reports=reports)
+    
+@app.route('/report/create', methods=['GET', 'POST'])
+@login_required
+def create_report():
+    if request.method == 'POST':
+        report_id = request.form['report_id'].strip().upper()
+        patient_id = request.form['patient_id'].strip()
+        draft_text = request.form['draft_text']
+        comments = request.form['comments']
+        status = request.form['report_status']
 
+        submitted_report = {
+            'report_id': report_id,
+            'patient_id': patient_id,
+            'draft_text': draft_text,
+            'comments': comments,
+            'report_status': status
+        }
+        
+        
+
+        if not report_id:
+            flash("Invalid report id", 'error')
+            patients = fetch_all('SELECT patient_id FROM patients') 
+            return render_template('reporting.html', patients=patients)
+        elif not (patient_id):
+            flash('invalid patient id ','error')
+            return render_template('reporting.html', patients=patients)
+        elif not re.match(r'^R\d{6}$', report_id):
+            flash("Invalid Report ID, must follow this format R000001,... R999999", 'error')
+            return render_template(
+            'reporting.html',
+            patients=patients,
+            report=submitted_report,
+            mode='create'
+            )
+          
+        else:
+            existing = fetch_one(
+                        "SELECT report_id FROM patient_report WHERE report_id=%s",
+                        (report_id,))
+            if existing:
+                flash("Report ID already exists.", "error")
+                return render_template(
+                    'reporting.html'
+                )
+            cur = mysql.connection.cursor()
+            cur.execute(
+                """
+                INSERT INTO patient_report (report_id, patient_id, draft_text, comments, report_status)
+                VALUES (%s,%s,%s,%s,%s)
+                """, 
+                (report_id, patient_id, draft_text, comments, 'Pending')
+            )
+            mysql.connection.commit()
+            cur.close()
+            flash("The report saved successfully!",'success')
+            return redirect(url_for('reporting'))
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT patient_id FROM patients")
+    patients = cur.fetchall()
+    cur.close()
+
+    return render_template(
+    'reporting.html',
+    patients=patients,
+    report=None,
+    mode='create'
+    )
+@app.route('/report/<report_id>/edit', methods=['GET', 'POST'])
+@login_required 
+def edit_report(report_id):
+    report = fetch_one('SELECT * FROM patient_report WHERE report_id = %s', (report_id,))
+    if not report:
+        flash('Report was not found.', 'error')
+        return redirect(url_for('reporting'))
+
+    if request.method == 'POST':
+        patient_id = request.form['patient_id'].strip()
+        draft_text = request.form['draft_text']
+        comments = request.form['comments']
+        status = request.form['report_status']
+        report_id = report['report_id']
+
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            UPDATE patient_report
+            SET patient_id = %s, draft_text = %s, comments = %s, report_status = %s, update_at = NOW()
+            WHERE report_id = %s
+        """, (patient_id, draft_text, comments, status, report_id))
+        mysql.connection.commit()
+        cur.close()
+
+        flash('Report updated successfully.', 'success')
+        return redirect(url_for('reporting'))
+
+    patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
+    return render_template(
+        'reporting.html',
+        patients=patients,
+        report=report,
+        mode='edit'
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

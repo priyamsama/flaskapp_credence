@@ -3,12 +3,14 @@
 {% block title %}Reporting{% endblock %}
 
 {% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Report Module</p>
+        <h1>{{ 'Update Report' if mode == 'edit' else 'Create Report' }}</h1>
+    </div>
+</section>
 
 <section class="form-panel">
-
-    <h2>
-        {{ 'Edit Report' if mode == 'edit' else 'Create Report' }}
-    </h2>
 
     <form method="POST" class="form-grid">
 
@@ -27,20 +29,12 @@
 
         <label>
             Patient ID
-            <select name="patient_id" required>
-                <option value="">Select Patient</option>
-
-                {% for patient in patients %}
-                <option
-                    value="{{ patient.patient_id }}"
-                    {% if report and report.patient_id == patient.patient_id %}
-                    selected
-                    {% endif %}
-                >
-                    {{ patient.patient_id }} - {{ patient.patient_name }}
-                </option>
+            <input type="text" name="patient_id" list="patient-id-list" value="{{ patient_id or '' }}" placeholder="Enter Patient ID or select Name" required>
+            <datalist id="patient-id-list">
+                {% for patient in patient_ids %}
+                <option value="{{ patient.patient_id }}">{{ patient.patient_name }}</option>
                 {% endfor %}
-            </select>
+            </datalist>
         </label>
 
         <br>
@@ -63,8 +57,6 @@
                 rows="4"
                 placeholder="Additional comments...">{{ report.comments if report else '' }}</textarea>
         </label>
-
-        <br>
 
         <label>
             Status
@@ -96,5 +88,4 @@
     </form>
 
 </section>
-
 {% endblock %}
