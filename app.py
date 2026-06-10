@@ -1,10 +1,8 @@
+import re
 from datetime import date
 from functools import wraps
-import os
-import re
 from flask import render_template, make_response
 from weasyprint import HTML
-import tempfile
 from dotenv import load_dotenv
 from flask import Flask, flash, render_template, redirect, request, session, url_for
 from flask_mysqldb import MySQL
@@ -138,15 +136,12 @@ def register_patient():
             }
             return render_template('patient_register.html', patient=submitted, mode='create')
 
-        # 1. Check required fields
         if not patient_name or not patient_id or not age_str or not gender or not number:
             return render_error('All fields are required.')
 
-        # 2. Patient ID format checking
         if not re.match(r'^P\d{6}$', patient_id):
             return render_error('Patient ID must follow the format P000001, P000002 … P999999.')
 
-        # 3. NEW: Age Validation
         try:
             age = int(age_str)
             if age < 0 or age > 120:
@@ -154,18 +149,15 @@ def register_patient():
         except ValueError:
             return render_error('Age must be a valid whole number.')
 
-        # 4. NEW: Contact Number Validation (Ensures exactly 10 digits)
         if not re.match(r'^\d{10}$', number):
             return render_error('Contact number must be exactly 10 digits long.')
 
-        # 5. Duplicate Patient ID check 
         existing_id = fetch_one(
             'SELECT patient_id FROM patients WHERE patient_id = %s', (patient_id,)
         )
         if existing_id:
             return render_error(f'Patient ID "{patient_id}" already exists.')
 
-        # 6. Database Insertion
         cur = mysql.connection.cursor()
         try:
             cur.execute("""
@@ -215,6 +207,7 @@ def patient_update():
                 update_field=update_field,
                 update_value=update_value
             )
+        update_value = update_value.strip()
 
         if not patient_id or not update_field or not update_value:
             return render_error('Patient ID, update field, and update value are required.')
@@ -237,11 +230,13 @@ def patient_update():
             except ValueError:
                 return render_error('Age must be a valid whole number.')
 
-        if update_field == 'gender' and update_value not in ['Male', 'Female', 'Other']:
+        elif update_field == 'gender' and update_value not in ['Male', 'Female', 'Other']:
             return render_error('Gender must be Male, Female, or Other.')
 
-        if update_field == 'contact_number' and not re.match(r'^\d{10}$', str(update_value)):
-            return render_error('Contact number must be exactly 10 digits long.')
+        elif update_field in ['contact_number', 'Contact Number']:
+            if not re.match(r'^\d{10}$', update_value):
+                return render_error('Contact number must be exactly 10 digits long.')
+
 
         cur = mysql.connection.cursor()
         cur.execute(
@@ -732,6 +727,10 @@ def edit_report(report_id):
     if not report:
         flash('Report was not found.', 'error')
         return redirect(url_for('reporting'))
+    patient = fetch_one('SELECT patient_id, patient_name FROM patients WHERE patient_id = %s', (report['patient_id'],))
+    if not patient:
+        flash('Patient was not found.', 'error')
+        return redirect(url_for('reporting'))
 
     if request.method == 'POST':
         patient_id = request.form['patient_id'].strip()
@@ -789,7 +788,7 @@ def search_report():
             INNER JOIN samples s ON p.patient_id = s.patient_id
         """
         
-        # 2. Track conditions dynamically
+        
         conditions = []
         params = []
 
@@ -807,8 +806,9 @@ def search_report():
 
         if conditions:
             sql += " WHERE " + " AND ".join(conditions)
-            
-        
+            #sql += " ORDER BY pr.created_at DESC"
+    results = fetch_all(sql, tuple(params))
+    print("Results:", results)
     return render_template(
         'report_search.html',
         results=results,
@@ -819,42 +819,52 @@ def search_report():
     )
 
 
-@app.route('/report/download/<report_id>', methods=['POST'])
+
+@app.route('/report/download', methods=['POST'])
 @login_required
-def draft_print(report_id):
-    patient_id = request.form['patient_id']
-    draft_text = request.form['draft_text']
+def draft_print():
+    report_id = request.form['report_id'].strip().upper()
+    patient_id = request.form['patient_id'].strip().upper()
     comments = request.form['comments']
-    status = request.form['report_status']
 
-    cur = mysql.connection.cursor()
-    cur.execute("""
-        UPDATE patient_report
-        SET patient_id = %s, draft_text = %s, comments = %s, report_status = %s, update_at = NOW()
-        WHERE report_id = %s
-    """, (patient_id, draft_text, comments, status, report_id))
-    mysql.connection.commit()
-    cur.close()
-
-    # Render HTML
-    html = render_template(
-        'report_pdf.html',
-        report_id=report_id,
-        patient_id=patient_id,
-        draft_text=draft_text,
-        comments=comments,
-        status=status
+    patient = fetch_one(
+        "SELECT * FROM patients WHERE patient_id = %s",
+        (patient_id,)
     )
 
-    # Generate PDF
+    if not patient:
+        flash("Patient was not found.", "error")
+        return redirect(url_for('reporting'))
+
+    sample = fetch_one("""
+        SELECT *
+        FROM samples
+        WHERE patient_id = %s
+        ORDER BY collection_date DESC
+        LIMIT 1
+    """, (patient_id,))
+
+    if not sample:
+        flash("No sample found for this patient.", "error")
+        return redirect(url_for('reporting'))
+
+    html = render_template(
+        "report_pdf.html",
+        report_id=report_id,
+        patient=patient,
+        sample=sample,
+        comments=comments
+    )
+
     pdf = HTML(string=html).write_pdf()
 
     response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'attachment; filename=report_{report_id}.pdf'
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename={report_id}_draft.pdf"
+    )
 
     return response
-
 
 
 

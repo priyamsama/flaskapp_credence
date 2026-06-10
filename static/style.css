@@ -406,6 +406,23 @@ select:focus {
 
 /* Buttons */
 button,
+.button{
+    background-color: var(--primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-white);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    height: 44px;
+    padding: 0 20px;
+    transition: var(--transition);
+    gap: 8px;
+}
 .button_1{
     background-color: rgb(43, 65, 154);
     border: none;
@@ -442,6 +459,10 @@ button,
 }
 
 button:hover,
+.button:hover{
+    background-color: rgb(115, 212, 106);;
+    box-shadow: 0 2px 8px rgba(79, 81, 177, 0.25);
+}
 .button_1:hover {
     background-color: rgb(115, 212, 106);
     box-shadow: 0 2px 8px rgba(104, 208, 118, 0.25);
@@ -454,12 +475,12 @@ button:hover,
 
 .button.secondary {
     background-color: #f1f5f9;
-    color: #4f9d78;
+    color: #2a7b7f;
     border: 1px solid #e2e8f0;
 }
 
 .button.secondary:hover {
-    background-color: #e2e8f0;
+    background-color: #b5eda7;
     box-shadow: none;
 }
 

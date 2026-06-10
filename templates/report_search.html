@@ -44,8 +44,9 @@
 <section class="panel">
     <h2 class="search-filter-grid">Search by Date Created </h2>
     <form method="POST" class="search-filter-grid">
-       <label for="start-date">
-            Start Date
+       
+        <label for="start-date">
+            Date
             <input type="date" id="created-at" name="created_at" value="{{ created_at }}">
         </label>
 
@@ -82,7 +83,7 @@
                         {{ report.report_id }}
                     </a>
                 </td>
-                <td>({{report.patient_id }})</td>
+                <td>{{report.patient_id }}</td>
                 <td>{{ report.patient_name }}</td>
                 <td>{{ report.sample_type }}</td> 
                 <td>{{ report.collection_date }}</td> 
