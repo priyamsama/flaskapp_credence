@@ -545,27 +545,44 @@ def edit_sample(sample_id):
 @login_required
 def patient_search():
     results = []
-    query = ''
+    patient_id = ''
+    patient_name = ''
     searched = False
 
     if request.method == 'POST':
         searched = True
-        query = request.form.get('query', '').strip()
-
+        patient_id = request.form.get('patient_id', '').strip()
+        patient_name = request.form.get('patient_name', '').strip()
+        
         sql = """
             SELECT patient_id, patient_name, age, gender, contact_number, created_at
             FROM patients
         """
         params = []
+        if not patient_id and not patient_name:
+            flash('Please enter a search term.', 'error')
+            return render_template(
+                'patient_search.html',
+                results=results,
+                patient_id=patient_id,
+                patient_name=patient_name,
+                searched=searched
+            )
 
-        if query:
-            search_value = f'%{query}%'
+        if patient_id:
+            searrch_value = f'%{patient_id}%'
             sql += """
-                WHERE patient_id LIKE %s
-                   OR patient_name LIKE %s
-                   OR contact_number LIKE %s
+                WHERE patient_id like %s
             """
-            params.extend([search_value, search_value, search_value])
+            params.extend([searrch_value])
+
+        if patient_name:
+            search_value = f'%{patient_name}%'
+            sql += """
+                WHERE patient_name LIKE %s
+                    
+            """
+            params.extend([search_value])
 
         sql += " ORDER BY created_at DESC"
         results = fetch_all(sql, tuple(params))
@@ -573,7 +590,8 @@ def patient_search():
     return render_template(
         'patient_search.html',
         results=results,
-        query=query,
+        patient_id=patient_id,
+        patient_name=patient_name,
         searched=searched
     )
 
