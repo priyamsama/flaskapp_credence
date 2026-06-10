@@ -12,35 +12,36 @@
 </section>
 
 <section class="panel">
-    <h2 class="search-filter-grid">Search by Sample ID and Patient Name </h2>
-    <form method="POST" class="search-filter-grid">
-        <label for="search-box">
-            <input type="search" id="search-box" name="query" value="{{ query }}" placeholder=" Type here...">
-        </label>
-        
-        <br>
-    </form>
-    <h2 class="search-filter-grid">Search by Sample Type </h2>
-    <form method="POST" class="search-filter-grid">
-        <label for="search-box">
-            <input type="search" id="search-box" name="query" value="{{ query }}" placeholder="Type here...">
-        </label>
-        
-        <br>
-    </form>
-    <h2 class="search-filter-grid">Search by Date Range </h2>
-    <form method="POST" class="search-filter-grid">
-       <label for="start-date">
-            Start Date
-            <input type="date" id="start-date" name="start_date" value="{{ start_date }}">
-        </label>
-        
-        
-        <label for="end-date">
-            End Date
-            <input type="date" id="end-date" name="end_date" value="{{ end_date }}">
-        </label>
-    </form>
+    <form method="POST" class="form-grid">
+    <label class="full-width">
+        Sample ID / Patient Name
+        <input type="search" name="query" value="{{ query }}" placeholder="e.g. S000001 or John">
+    </label>
+
+    <label class="full-width">
+        Sample Type
+        <select name="sample_type">
+            <option value="">All Types</option>
+            {% for t in ['Blood', 'Swab', 'Tissue'] %}
+            <option value="{{ t }}" {% if sample_type == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label class="full-width">
+        Start Date
+        <input type="date" name="start_date" value="{{ start_date }}">
+    </label>
+
+    <label class="full-width">
+        End Date
+        <input type="date" name="end_date" value="{{ end_date }}">
+    </label>
+
+    <div class="form-actions">
+        <button type="submit">Search</button>
+    </div>
+</form>
 </section>
 <br>
 <button type="submit" class="search-filter-grid" text-color="black">

@@ -13,36 +13,19 @@
 <section class="form-panel">
 
     <form method="POST" class="form-grid">
-
         <label>
-            Report ID
-            <input
-                type="text"
-                name="report_id"
-                value="{{ report.report_id if report else '' }}"
-                {% if mode == 'edit' %}readonly{% endif %}
-                placeholder="e.g. R000001"
-                required>
-        </label>
-
-        <br>
-
-        <label>
-            Patient ID
-            <input 
-                type="text" 
-                name="patient_id" 
-                list="patient-id-list" 
-                value="{{ report.patient_id if report else '' }}"
-                {% if mode == 'edit' %}readonly{% endif %} 
-                placeholder="Enter Patient ID or select Name" 
-                required>
-            <datalist id="patient-id-list">
-                {% for patient in patient_ids %}
-                <option value="{{ patient.patient_id }}">{{ patient.patient_name }}</option>
-                {% endfor %}
-            </datalist>
-        </label>
+    Sample ID
+    <input type="text" name="sample_id" list="sample-id-list"
+           value="{{ report.sample_id if report else '' }}"
+           {% if mode == 'edit' %}readonly{% endif %}
+           placeholder="e.g. S000001" required>
+    <datalist id="sample-id-list">
+        {% for s in samples %}
+        <option value="{{ s.sample_id }}">{{ s.sample_type }} — {{ s.patient_id }}</option>
+        {% endfor %}
+    </datalist>
+</label>
+    
 
         <br>
 

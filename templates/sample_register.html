@@ -18,20 +18,21 @@
 <section class="form-panel">
     <form method="POST" class="form-grid">
         <label>
-            Sample ID
-            <input type="text" name="sample_id" value="{{ sample.sample_id if sample else '' }}" {% if mode == 'edit' %}disabled{% else %}placeholder="e.g. S000001"{% endif %} required>
-        </label>
-
-        <label>
             Patient
-            <select name="patient_id" required>
-                <option value="">Select patient</option>
-                {% for patient in patients %}
-                <option value="{{ patient.patient_id }}" {% if sample and sample.patient_id == patient.patient_id %}selected{% endif %}>{{ patient.patient_name }} ({{ patient.patient_id }})</option>
-                {% endfor %}
-            </select>
+            <input 
+            type="text" 
+            name="patient_id"
+            list="patient_list" 
+            placeholder="Type patient ID or name..." 
+            value="{{ sample.patient_id if sample else '' }}" 
+            required>
+            <datalist id="patient_list">
+            {% for patient in patients %}
+            <option value="{{ patient.patient_id }}">{{ patient.patient_name }}</option>
+            {% endfor %}
+            </datalist>
         </label>
-
+        <br>
         <label>
             Sample Type
             <select name="sample_type" required>
@@ -41,17 +42,17 @@
                 {% endfor %}
             </select>
         </label>
-
+        <br>
         <label>
             Collection Date
             <input type="date" name="collection_date" max="{{today}}" value="{{ sample.collection_date if sample else '' }}" required>
         </label>
-
+        <br>
         <label class="full-width">
             Test Name
             <input type="text" name="test" placeholder="e.g. Complete Blood Count (CBC)" value="{{ sample.test if sample else '' }}" required>
         </label>
-
+        
         <label>
             Referring Doctor
             <input type="text" id="referring_doctor" name="referring_doctor" placeholder="e.g. Dr. Arthur Smith" value="{{ sample.referring_doctor if sample else '' }}" required>
