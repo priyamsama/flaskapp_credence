@@ -807,7 +807,7 @@ def search_report():
         if conditions:
             sql += " WHERE " + " AND ".join(conditions)
             #sql += " ORDER BY pr.created_at DESC"
-    results = fetch_all(sql, tuple(params))
+        results = fetch_all(sql, tuple(params))
     print("Results:", results)
     return render_template(
         'report_search.html',
