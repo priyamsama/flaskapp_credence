@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends "base.html" %} {% block title %}Reporting{% endblock %} {% block
 content %}
 
@@ -126,3 +127,65 @@ content %}
 </section>
 
 {% endblock %}
+=======
+{% extends "base.html" %}
+
+{% block title %}Reporting{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Report Module</p>
+        <h1>{{ 'Update Report' if mode == 'edit' else 'Create Report' }}</h1>
+    </div>
+</section>
+
+<section class="form-panel">
+
+    <form method="POST" class="form-grid">
+        <label>
+    Sample ID
+    <input type="text" name="sample_id" list="sample-id-list"
+           value="{{ report.sample_id if report else '' }}"
+           {% if mode == 'edit' %}readonly{% endif %}
+           placeholder="e.g. S000001" required>
+    <datalist id="sample-id-list">
+        {% for s in samples %}
+        <option value="{{ s.sample_id }}">{{ s.sample_type }} — {{ s.patient_id }}</option>
+        {% endfor %}
+    </datalist>
+</label>
+    
+
+        <br>
+
+        <label class="full-width">
+            Comments
+            <textarea
+                name="comments"
+                rows="4"
+                placeholder="Additional comments...">{{ report.comments if report else '' }}</textarea>
+        </label>
+
+        
+
+        <div >
+            <button
+                type="submit"
+                class="button_1"
+                formaction="{{ url_for('draft_print') }}">
+                {{ 'Download Draft PDF' if mode == 'edit' else 'Create Draft Report' }}            </button>
+        </div>
+        <div>
+            <button type="submit" class="button_2">
+                {{ 'Update Report' if mode == 'edit' else 'Create Final Report' }}
+            </button>
+        </div>
+        
+        
+
+    </form>
+
+</section>
+{% endblock %}
+>>>>>>> e26fc783b38d3555e8489749acd41129dcbf66b1

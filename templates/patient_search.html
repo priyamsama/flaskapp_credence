@@ -11,15 +11,37 @@
     <a class="button secondary" href="{{ url_for('patient') }}">Back to Patients</a>
 </section>
 
-<section class="form-panel">
-    <form method="POST" class="search-form">
-        <input type="search" name="query" value="{{ query }}" placeholder="Search by patient ID, name, or contact number...">
+
+<section class="panel">
+    <h2 class="search-filter-grid">Search by Patient Name </h2>
+    <form method="POST" class="search-filter-grid">
+        <label for="search-box">
+            <input type="search" id="search-box" name="patient_name" value="{{ query }}" placeholder=" Type here...">
+        </label>
+        
+        <br>
         <button type="submit">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <span>Search</span>
         </button>
     </form>
 </section>
+
+<section class="panel">
+    <h2 class="search-filter-grid">Search by Patient ID </h2>
+    <form method="POST" class="search-filter-grid">
+        <label for="search-box">
+            <input type="search" id="search-box" name="patient_id" value="{{ query }}" placeholder="Type here...">
+        </label>
+        
+        <br>
+        <button type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Search</span>
+        </button>
+    </form>
+</section>
+
 
 {% if searched %}
 <section class="panel">

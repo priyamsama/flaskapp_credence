@@ -148,7 +148,7 @@ nav a.active {
 /* Page Headers */
 .page-header {
     display: flex;
-    align-items: center;
+    align-items: left;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 32px;
@@ -161,6 +161,8 @@ nav a.active {
     letter-spacing: 0.05em;
     margin-bottom: 6px;
     text-transform: uppercase;
+    text-align: left;
+
 }
 
 h1 {
@@ -349,6 +351,7 @@ h2 {
     .form-grid .full-width,
     .form-grid .form-actions {
         grid-column: span 2;
+        box-sizing: border-box;
     }
 }
 
@@ -390,7 +393,7 @@ input::placeholder {
 input:focus,
 select:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    box-shadow: 0 0 0 3px rgba(77, 79, 177, 0.15);
     flex: 1;
 }
 
@@ -403,8 +406,42 @@ select:focus {
 
 /* Buttons */
 button,
-.button {
+.button{
     background-color: var(--primary);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-white);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    height: 44px;
+    padding: 0 20px;
+    transition: var(--transition);
+    gap: 8px;
+}
+.button_1{
+    background-color: rgb(43, 65, 154);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-white);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    height: 44px;
+    padding: 0 20px;
+    transition: var(--transition);
+    gap: 8px;
+}
+.button_2{
+    background-color: rgb(185, 91, 91);
     border: none;
     border-radius: var(--radius-sm);
     color: var(--text-white);
@@ -422,19 +459,28 @@ button,
 }
 
 button:hover,
-.button:hover {
-    background-color: var(--primary-hover);
-    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+.button:hover{
+    background-color: rgb(115, 212, 106);;
+    box-shadow: 0 2px 8px rgba(79, 81, 177, 0.25);
+}
+.button_1:hover {
+    background-color: rgb(115, 212, 106);
+    box-shadow: 0 2px 8px rgba(104, 208, 118, 0.25);
+}
+
+.button_2:hover {
+    background-color: rgb(115, 212, 106);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
 }
 
 .button.secondary {
     background-color: #f1f5f9;
-    color: #334155;
+    color: #2a7b7f;
     border: 1px solid #e2e8f0;
 }
 
 .button.secondary:hover {
-    background-color: #e2e8f0;
+    background-color: #b5eda7;
     box-shadow: none;
 }
 
@@ -624,7 +670,54 @@ tbody tr:hover {
     color: var(--text-muted);
     font-size: 14px;
     margin-bottom: 28px;
-    text-align: center;
+    text-align: center;* Container Label */
+.full-width1 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Space between the text label and the textarea */
+    width: 100%;
+    max-width: 100%; /* Ensures it doesn't break parent containers */
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 1.5rem;
+}
+
+/* The Textarea Box itself */
+.full-width1 textarea {
+    width: 100%;
+    min-height: 120px; /* Base height for roughly 4 rows */
+    padding: 12px 16px;
+    border: 1px solid #cccccc;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #2c3e50;
+    font-size: 14px;
+    line-height: 1.5;
+    font-family: inherit; /* Inherits font from label */
+    resize: vertical; /* Allows user to stretch vertically, but stops horizontal breaking */
+    box-sizing: border-box;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* Placeholder Styling */
+.full-width1 textarea::placeholder {
+    color: #a0aec0;
+    opacity: 1;
+}
+
+/* Interactive States */
+.full-width1 textarea:hover {
+    border-color: #a0aec0;
+}
+
+.full-width1 textarea:focus {
+    outline: none;
+    border-color: #3182ce; /* Modern Medical/Corporate Blue */
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2); /* Soft blue halo glow */
+    background-color: #fff;
+}
     line-height: 1.5;
 }
 

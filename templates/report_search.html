@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Search Reports{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Report Module</p>
+        <h1>Search Reports</h1>
+    </div>
+    <a class="button secondary" href="{{ url_for('report') }}">Back to Reports</a>
+</section>
+
+<section class="panel">
+    <h2 class="search-filter-grid">Search by Report ID </h2>
+    <form method="POST" class="search-filter-grid">
+        <label for="search-box">
+            <input type="search" id="search-box" name="report_id" value="{{ report_id }}" placeholder=" Type here...">
+        </label>
+        
+        <br>
+        <button type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Search</span>
+        </button>
+    </form>
+</section>
+
+<section class="panel">
+    <h2 class="search-filter-grid">Search by Patient ID </h2>
+    <form method="POST" class="search-filter-grid">
+        <label for="search-box">
+            <input type="search" id="search-box" name="patient_id" value="{{ patient_id }}" placeholder="Type here...">
+        </label>
+        
+        <br>
+        <button type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Search</span>
+        </button>
+    </form>
+</section>
+
+<section class="panel">
+    <h2 class="search-filter-grid">Search by Date Created </h2>
+    <form method="POST" class="search-filter-grid">
+       
+        <label for="start-date">
+            Date
+            <input type="date" id="created-at" name="created_at" value="{{ created_at }}">
+        </label>
+
+        <button type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Search</span>
+        </button>
+    </form>
+</section>
+
+{% if searched %}
+<section class="panel">
+    <div class="panel-heading">
+        <h2>Search Results</h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Report ID</th>
+                <th>Patient ID</th>
+                <th>Patient Name</th>
+                <th>Type</th>
+                <th>Collection Date</th>
+                <th>Test</th>
+                <th>Referring Doctor</th>
+                <th>Referring Hospital</th>
+            </tr>
+        </thead>
+        <tbody>  
+            {% for report in results %}
+            <tr>
+                <td>
+                    <a class="table-link" href="{{ url_for('edit_report', report_id=report.report_id) }}">
+                        {{ report.report_id }}
+                    </a>
+                </td>
+                <td>{{report.patient_id }}</td>
+                <td>{{ report.patient_name }}</td>
+                <td>{{ report.sample_type }}</td> 
+                <td>{{ report.collection_date }}</td> 
+                <td>{{ report.test }}</td>            
+                <td>{{ report.referring_doctor }}</td> 
+                <td>{{ report.referring_hospital }}</td> 
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="empty">No matching samples found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endif %}
+{% endblock %}

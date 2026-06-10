@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Report{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Report Module</p>
+        <h1>{{ 'Update Report' if mode == 'edit' else 'Existing Report' }}</h1>
+    </div>
+
+    {% if mode == 'edit' %}
+    <a class="button secondary" href="{{ url_for('reporting') }}">Back to Report List</a>
+    {% else %}
+    <a class="button secondary" href="{{ url_for('create_report') }}">Create a new Report </a>
+    {% endif %}
+</section>
+<section class="panel">
+    <div class="panel-heading">
+        <h2>Existing Report List </h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Report ID</th>
+                <th>Patient ID</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Created At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in reports %}
+            <tr>
+                <td><a class="table-link" href="{{ url_for('edit_report', report_id=item.report_id) }}">{{ item.report_id }}</a></td>
+                <td><strong>{{ item.patient_id }}</strong></td>
+                <td>{{ item.patient_name }}</td>
+                <td>{{ item.report_status }}</td>
+                <td>{{ item.created_at }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="empty">No reports available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}
