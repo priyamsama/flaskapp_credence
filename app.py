@@ -111,7 +111,7 @@ def dashboard():
 @app.route('/patient')
 @login_required
 def patient():
-    patients= fetch_all('SELECT * from patients ORDER BY created_at DESC')
+    patients= fetch_all('SELECT *FROM patients ORDER BY created_at DESC LIMIT 10' )
     return render_template('patient_menu.html',patients=patients)
 
 

@@ -19,14 +19,7 @@
         </label>
         
         <br>
-        <button type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <span>Search</span>
-        </button>
     </form>
-</section>
-
-<section class="panel">
     <h2 class="search-filter-grid">Search by Sample Type </h2>
     <form method="POST" class="search-filter-grid">
         <label for="search-box">
@@ -34,34 +27,26 @@
         </label>
         
         <br>
-        <button type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <span>Search</span>
-        </button>
     </form>
-</section>
-
-<section class="panel">
     <h2 class="search-filter-grid">Search by Date Range </h2>
     <form method="POST" class="search-filter-grid">
        <label for="start-date">
             Start Date
             <input type="date" id="start-date" name="start_date" value="{{ start_date }}">
         </label>
-    
+        
         
         <label for="end-date">
             End Date
             <input type="date" id="end-date" name="end_date" value="{{ end_date }}">
         </label>
-
-        <button type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <span>Search</span>
-        </button>
     </form>
 </section>
-
+<br>
+<button type="submit" class="search-filter-grid" text-color="black">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>Search</span>
+</button>
 {% if searched %}
 <section class="panel">
     <div class="panel-heading">
