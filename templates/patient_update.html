@@ -16,19 +16,12 @@
         <h2>Select Field to Update</h2>
     </div>
     <form method="POST" class="form-grid" style="grid-template-columns: 1fr; padding: 24px;">
-        <label for="patient_input">
+        <label>
             Patient ID
-            <input 
-            type="text" 
-            id="patient_input"
-            name="patient_id" 
-            list="patient-id-list"
-            placeholder="Enter Patient ID or select Name" 
-            value="{{ patient_id or '' }}" 
-            required>
+            <input type="text" name="patient_id" list="patient-id-list" value="{{ patient_id or '' }}" placeholder="Enter Patient ID or select Name" required>
             <datalist id="patient-id-list">
                 {% for patient in patient_ids %}
-                <option value="{{ patient.patient_id }}">{{ patient.patient_id }}</option>
+                <option value="{{ patient.patient_id }}">{{ patient.patient_name }}</option>
                 {% endfor %}
             </datalist>
         </label>
@@ -60,7 +53,7 @@
         </div>
     </form>
 </section>
-
+<!--
 <script>
     const fieldSelect = document.querySelector('select[name="update_field"]');
     const textInput = document.getElementById('value-input-text');
@@ -98,5 +91,5 @@
 
     fieldSelect.addEventListener('change', updateInputs);
     document.addEventListener('DOMContentLoaded', updateInputs);
-</script>
+</script>-->
 {% endblock %}

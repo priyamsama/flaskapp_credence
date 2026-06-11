@@ -20,20 +20,7 @@
            placeholder="e.g. S000001" required>
         <datalist id="sample-id-list">
             {% for s in samples %}
-            <option value="{{ s.sample_id }}">{{ s.sample_type }} — {{ s.patient_id }}</option>
-            {% endfor %}
-        </datalist>
-        </label>
-
-        <label>
-            Patient ID
-        <input type="text" name="patient_id" list="patient-id-list"
-           value="{{ report.patient_id if report else '' }}"
-           {% if mode == 'edit' %}readonly{% endif %}
-           placeholder="e.g. P000001" required>
-        <datalist id="patient-id-list">
-            {% for s in samples %}
-            <option value="{{ s.patient_id }}">{{ s.patient_name }} — {{ s.patient_id }}</option>
+            <option value="{{ s.sample_id }}">{{ s.sample_id }} — {{ s.patient_id }}</option>
             {% endfor %}
         </datalist>
         </label>
@@ -55,28 +42,21 @@
         <div >
             <button
                 type="submit"
+                name="action"
                 class="button_1"
-                formaction="{{ url_for('draft_print') }}">
-                {{ 'Download Draft PDF' if mode == 'edit' else 'Save' }}            </button>
+                value="download"
+                formaction="{{ url_for('create_report') }}">
+                {{ 'Download Draft PDF' if mode == 'edit' else 'Without Signature' }}            </button>
         </div>
         <div >
             <button
                 type="submit"
                 class="button_2"
                 formaction="{{ url_for('draft_print') }}">
-                {{ 'Download Draft PDF' if mode == 'edit' else 'Save and Download Draft' }}            </button>
+                {{ 'Download Draft PDF' if mode == 'edit' else 'With Signature' }}            </button>
         </div>
     </form>
     <br>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-            <label for="image-picker">Choose an image to upload:</label>
-            <input 
-                type="file" 
-                id="image-picker" 
-                name="user_image" 
-                accept="image/*" 
-                required>
-        </form>
 
 </section>
 {% endblock %}

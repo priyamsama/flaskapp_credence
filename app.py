@@ -98,7 +98,8 @@ def login():
         env_username = app.config['ADMIN_USERNAME']
         env_password = app.config['ADMIN_PASSWORD']
         valid_database_user = user and check_password_hash(user['password_hash'], password)
-        valid_env_user = username == env_username and password == env_password
+        valid_env_user = username == env_username and password == env_password # we only used the env use for the login credential
+
 
 
         if valid_database_user or valid_env_user:
@@ -209,7 +210,7 @@ def patient_update():
     if request.method == 'POST':
         patient_id = request.form.get('patient_id', '').strip().upper()
         update_field = request.form.get('update_field', '').strip()
-        update_value = request.form.get('update_value', '').strip()
+        update_value = request.form.get('update_value', '').strip().capitalize()
 
         def render_error(msg):
             flash(msg, 'error')
@@ -271,7 +272,6 @@ def patient_update():
         patient_fields=patient_fields,
         patient_ids=patient_ids
     )
-
 
 @app.route('/patient/<patient_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -394,20 +394,7 @@ def sample_update():
         'referring_doctor': 'Referring Doctor',
         'referring_hospital': 'Referring Hospital',
     }
-    def get_dropdown_data():
-        samples = fetch_all("""
-            SELECT s.sample_id, p.patient_name
-            FROM samples s
-            JOIN patients p ON p.patient_id = s.patient_id
-            ORDER BY s.sample_id
-        """)
-        patients = fetch_all("""
-            SELECT patient_id, patient_name
-            FROM patients
-            ORDER BY patient_id
-        """)
-        return samples, patients
-
+    
 
     if request.method == 'POST':
         sample_id = request.form.get('sample_id', '').strip().upper()
@@ -667,26 +654,40 @@ def reporting():
     reports = cursor.fetchall()
     cursor.close()
     return render_template('report_list.html', reports=reports)
-    
-@app.route('/report/create', methods=['GET', 'POST'])
+
+'''   
+@app.route('/report/download', methods=['GET', 'POST'])
 @login_required
 def create_report():
-    samples = fetch_all('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
+    samples = fetch_one('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
 
     if request.method == 'POST':
         report_id = generate_report_id()
         sample_id = request.form.get('sample_id', '').strip()
-        comments  = request.form.get('comments', '').strip()
+        comments  = request.form.get('comments', '')
+        
+        def render_error(msg):
+            flash(msg, 'error')
+            return render_template('report_create.html', samples=samples, report=None, mode='create')
 
-        # validate sample
-        sample = fetch_one('SELECT * FROM samples WHERE sample_id = %s', (sample_id,))
+
+
+        # sample validation part 
+        sample = fetch_all('SELECT * FROM samples WHERE sample_id = %s', (sample_id,))
         if not sample:
             flash('Sample not found.', 'error')
-            return render_template('reporting.html', samples=samples, report=None, mode='create')
+            return render_template('report_create.html', samples=samples, report=None, mode='create')
+        
+        existing = fetch_one(
+            'SELECT report_id FROM patient_report WHERE sample_id = %s', (sample_id,)
+        )
+        if existing:
+            return render_error(f'A report already exists for sample {sample_id} (Report ID: {existing["report_id"]}).')
 
-        patient_id = sample['patient_id']  # auto-resolved
+        patient_id = sample['patient_id']
 
         cur = mysql.connection.cursor()
+
         try:
             cur.execute("""
                 INSERT INTO patient_report (report_id, patient_id, sample_id, comments, report_status)
@@ -699,11 +700,127 @@ def create_report():
             mysql.connection.rollback()
             print(e)
             flash('An unexpected error occurred.', 'error')
-            return render_template('reporting.html', samples=samples, report=None, mode='create')
+            return render_template('report_create.html', samples=samples, report=None, mode='create')
         finally:
             cur.close()
 
-    return render_template('reporting.html', samples=samples, report=None, mode='create')
+    sample=fetch_all(
+        'select * from samples where sample_id = %s'
+        (sample[0])
+    )
+    patient= fetch_one(
+        'select * from patients where patient_id=%s'
+        (sample[0],['patient_id'])
+    )
+    report_id= fetch_one(
+        'select report_id from patient_report where sample_id = %s '
+        (sample_id)
+    )
+    if not sample:
+        flash("Sample was not found.", "error")
+        return redirect(url_for('reporting'))
+
+    sample = fetch_one("""
+        SELECT *
+        FROM samples
+        WHERE sample_id = %s
+        ORDER BY collection_date DESC
+        LIMIT 1
+    """, (sample_id,))
+
+    if not sample:
+        flash("No sample found for this patient.", "error")
+        return redirect(url_for('reporting'))
+
+    html = render_template(
+        "report_pdf.html",
+        report_id=report_id,
+        patient=patient,
+        sample=sample,
+        comments=comments
+    )
+
+    pdf = HTML(string=html).write_pdf()
+
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename={sample_id}_draft.pdf"
+    )
+
+    return response
+'''
+@app.route('/report/create', methods=['GET', 'POST'])
+@login_required
+def create_report():
+    samples = fetch_all('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
+
+    if request.method == 'POST':
+        sample_id = request.form.get('sample_id', '').strip()
+        comments  = request.form.get('comments', '').strip()
+        action    = request.form.get('action', 'save')  # 'save' or 'download'
+
+        def render_error(msg):
+            flash(msg, 'error')
+            return render_template('report_create.html', samples=samples, report=None, mode='create')
+
+        if not sample_id:
+            return render_error('Please select a sample.')
+
+        # fetch_one returns a dict — correct
+        sample = fetch_one('SELECT * FROM samples WHERE sample_id = %s', (sample_id,))
+        if not sample:
+            return render_error('Sample not found.')
+
+        # duplicate check
+        existing = fetch_one(
+            'SELECT report_id FROM patient_report WHERE sample_id = %s', (sample_id,)
+        )
+        if existing:
+            return render_error(
+                f'A report already exists for sample {sample_id} (Report ID: {existing["report_id"]}).'
+            )
+
+        patient_id = sample['patient_id']  # works because fetch_one returns a dict
+        patient = fetch_one('SELECT * FROM patients WHERE patient_id = %s', (patient_id,))
+        report_id = generate_report_id()   # generate ONCE here, use everywhere below
+      
+        cur = mysql.connection.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO patient_report (report_id, patient_id, sample_id, comments)
+                VALUES (%s, %s, %s, %s)
+            """, (report_id, patient_id, sample_id, comments))
+            mysql.connection.commit()
+        except Exception as e:
+            mysql.connection.rollback()
+            print(e)
+            return render_error('An unexpected error occurred while saving.')
+        finally:
+            cur.close()
+
+        # download PDF if that button was clicked
+        if action == 'download':
+            html = render_template(
+                'report_pdf.html',
+                
+                report_id=report_id,
+                patient=patient,
+                sample=sample,
+                comments=comments
+            )
+            pdf = HTML(string=html).write_pdf()
+            response = make_response(pdf)
+            response.headers['Content-Type'] = 'application/pdf'
+            response.headers['Content-Disposition'] = f'attachment; filename={sample_id}_report.pdf'
+            return response
+
+        flash('Report created successfully.', 'success')
+        return redirect(url_for('reporting'))
+
+    return render_template('report_create.html', samples=samples, report=None, mode='create')
+
+# report edit for particular report id
 @app.route('/report/<report_id>/edit', methods=['GET', 'POST'])
 @login_required 
 def edit_report(report_id):
@@ -754,7 +871,7 @@ def search_report():
     if request.method == 'POST':
         searched = True
         report_id = request.form.get('report_id', '').strip()
-        patient_id = request.form.get('patient_id', '').strip()
+        patient_id = request.form.get('patient_name', '').strip()
         created_at = request.form.get('created_at', '').strip()
         
         sql = """
