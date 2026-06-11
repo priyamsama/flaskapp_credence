@@ -231,15 +231,9 @@ def patient_update():
         if not patient_id or not update_field or not update_value:
             return render_error('Patient ID, update field, and update value are required.')
 
-        if not re.match(r'^P\d{6}$', patient_id):
-            return render_error('Patient ID must follow the format P000001, P000002 ... P999999.')
-
         if update_field not in patient_fields:
             return render_error('Invalid patient field selected.')
 
-        existing_patient = fetch_one('SELECT patient_id FROM patients WHERE patient_id = %s', (patient_id,))
-        if not existing_patient:
-            return render_error('Patient was not found.')
 
         if update_field == 'age':
             try:
@@ -743,7 +737,7 @@ def edit_report(report_id):
 
     patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
     return render_template(
-        'reporting.html',
+        'report_edit.html',
         patients=patients,
         report=report,
         mode='edit'
