@@ -15,8 +15,8 @@ from config import Config
 load_dotenv()
 
 app = Flask(__name__)
-app.config.from_object(Config)
-mysql = MySQL(app)
+app.config.from_object(Config) # this line loads the configuration from config.py, including database credentials and secret key
+mysql = MySQL(app) #here its initialiize the mysql with flask app, so we can use  mysql.connection to interact with the db, by flask_mysqldb library
 
 
 def login_required(view):
@@ -294,8 +294,8 @@ def edit_patient(patient_id):
             request.form['contact_number'].strip(),
             patient_id,
         ))
-        mysql.connection.commit() # here the db changes permenantly saved without commit changes stay in memory
-        cur.close() # releases the database resources
+        mysql.connection.commit() 
+        cur.close()
         flash('Patient updated successfully.', 'success')
         return redirect(url_for('patient_update'))
 
@@ -340,7 +340,6 @@ def register_sample():
                 mode='create'
             )
 
-        # 1. Required fields 
         if not sample_id or not patient_id or not sample_type or not test or not collection_date or not referring_doctor or not referring_hospital:
             return render_error('All fields are required.')
 
@@ -351,11 +350,9 @@ def register_sample():
         if not patient:
             return render_error('Selected patient does not exist.')
 
-        # 4. Sample type whitelist 
         if sample_type not in ['Blood', 'Swab', 'Tissue']:
             return render_error('Invalid sample type.')
 
-        #  5. Date must not be in the future 
         try:
             if date.fromisoformat(collection_date) > date.today():
                 return render_error('Collection date cannot be in the future.')
@@ -423,24 +420,19 @@ def sample_update():
             flash(" Sample ID must follow the format S000001...S999999",'error')
         
         else:
-            # Check if sample exists in database
             sample_check = fetch_one('SELECT sample_id FROM samples WHERE sample_id = %s', (sample_id,))
             if not sample_check:
                 flash('Sample was not found.', 'error')
                 
-            # Check patient validity if updating patient_id
             elif update_field == 'patient_id' and not fetch_one('SELECT patient_id FROM patients WHERE patient_id = %s', (update_value,)):
                 flash('Selected patient does not exist.', 'error')
                 
-            # Check sample type dropdown values
             elif update_field == 'sample_type' and update_value not in ['Blood', 'Swab', 'Tissue']:
                 flash('Sample type must be Blood, Swab, or Tissue.', 'error')
                 
-            # Check date
             elif update_field == 'collection_date' and update_value > str(date.today()):
                 flash('Collection date cannot be in the future.', 'error')
                 
-            # Check that text fields aren't completely blanked out
             elif update_field in ('referring_doctor', 'referring_hospital', 'test') and not update_value:
                 flash(f'{sample_fields[update_field]} cannot be empty.', 'error')
                 
@@ -465,7 +457,6 @@ def sample_update():
             sample_id=sample_id, update_field=update_field, update_value=update_value
         )
 
-    # 4. Handle standard GET request (initial page load)
     sample_ids = fetch_all("SELECT s.sample_id, p.patient_name FROM samples s JOIN patients p ON p.patient_id = s.patient_id ORDER BY s.sample_id")
     patient_ids = fetch_all("SELECT patient_id, patient_name FROM patients ORDER BY patient_id")
     
@@ -486,7 +477,6 @@ def edit_sample(sample_id):
         return redirect(url_for('sample_update'))
 
     if request.method == 'POST':
-        # getting form ddata 
         patient_id         = request.form['patient_id'].strip()
         sample_type        = request.form['sample_type'].strip()
         test               = request.form['test'].strip()
