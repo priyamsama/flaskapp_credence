@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Report{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Edit Report </p>
+    </div>
+</section>
+
+<section class="form-panel">
+    <form method="POST" class="form-grid">
+        <label>
+            Sample ID
+        <input type="text" name="sample_id" list="sample-id-list"
+           value="{{ report.sample_id if report else '' }}"
+           {% if mode == 'edit' %}readonly{% endif %}
+           placeholder="e.g. S000001" required>
+        <datalist id="sample-id-list">
+            {% for s in samples %}
+            <option value="{{ s.sample_id }}">{{ s.sample_type }} — {{ s.patient_id }}</option>
+            {% endfor %}
+        </datalist>
+        </label>
+    
+
+        <br>
+
+            <label class="full-width">
+                Comments
+            <textarea
+            name="comments"
+            rows="4"
+            style="resize: none; width: 100%; max-width: 100%; box-sizing: border-box; height: 500px; font-size: medium;"
+            placeholder="Additional comments...">{{ report.comments if report else '' }}</textarea>
+            </label>
+
+        
+
+        <div >
+            <button
+                type="submit"
+                class="button_1"
+                formaction="{{ url_for('draft_print') }}">
+                {{ 'Download Draft PDF' if mode == 'edit' else 'Create Draft Report' }}            </button>
+        </div>
+        <div>
+
+        </div>
+        <div>
+            <button type="submit" class="button_2">
+                {{ 'Update Report' if mode == 'edit' else 'Create Final Report' }}
+            </button>
+        </div>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <label for="image-picker">Choose an image to upload:</label>
+            <input 
+                type="file" 
+                id="image-picker" 
+                name="user_image" 
+                accept="image/*" 
+                required>
+        </form>
+        
+
+    </form>
+
+</section>
+{% endblock %}

@@ -14,8 +14,8 @@
 <section class="panel">
     <form method="POST" class="form-grid">
     <label class="full-width">
-        Sample ID / Patient Name
-        <input type="search" name="query" value="{{ query }}" placeholder="e.g. S000001 or John">
+        Sample ID / Patient ID
+        <input type="search" name="query" value="{{ query }}" placeholder="e.g. S000001 or P000001">
     </label>
 
     <label class="full-width">
@@ -44,10 +44,6 @@
 </form>
 </section>
 <br>
-<button type="submit" class="search-filter-grid" text-color="black">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <span>Search</span>
-</button>
 {% if searched %}
 <section class="panel">
     <div class="panel-heading">

@@ -15,9 +15,10 @@ from config import Config
 load_dotenv()
 
 app = Flask(__name__)
-app.config.from_object(Config)
-mysql = MySQL(app)
+app.config.from_object(Config) # this line loads the configuration from config.py, including database credentials and secret key
+mysql = MySQL(app) #here its initialiize the mysql with flask app, so we can use  mysql.connection to interact with the db, by flask_mysqldb library
 
+#this fuction act as a gate keeper for the routes which requieres login
 
 def login_required(view):
     @wraps(view)
@@ -28,9 +29,11 @@ def login_required(view):
 
     return wrapped_view
 
+# these are the helper fuction fetch data fromt the db instead of repeating it 
 
 def fetch_all(query, params=()):
-    cur = mysql.connection.cursor(DictCursor)
+    cur = mysql.connection.cursor(DictCursor) #this line make each row comes as the form of dictionary 
+
     cur.execute(query, params)
     rows = cur.fetchall()
     cur.close()
@@ -43,6 +46,9 @@ def fetch_one(query, params=()):
     row = cur.fetchone()
     cur.close()
     return row
+
+# these functions used to generate unique ids for patient samples and reports
+
 
 def generate_patient_id():
     row = fetch_one("SELECT patient_id FROM patients ORDER BY LENGTH(patient_id) DESC, patient_id DESC LIMIT 1")
@@ -65,7 +71,7 @@ def generate_report_id():
     last_num = int(row['report_id'][1:])
     return f'R{last_num + 1:06d}'
 
-
+# this is the main route to the app login 
 @app.route('/')
 def index():
     if session.get('user_id') is not None:
@@ -92,7 +98,8 @@ def login():
         env_username = app.config['ADMIN_USERNAME']
         env_password = app.config['ADMIN_PASSWORD']
         valid_database_user = user and check_password_hash(user['password_hash'], password)
-        valid_env_user = username == env_username and password == env_password
+        valid_env_user = username == env_username and password == env_password # we only used the env use for the login credential
+
 
 
         if valid_database_user or valid_env_user:
@@ -203,7 +210,7 @@ def patient_update():
     if request.method == 'POST':
         patient_id = request.form.get('patient_id', '').strip().upper()
         update_field = request.form.get('update_field', '').strip()
-        update_value = request.form.get('update_value', '').strip()
+        update_value = request.form.get('update_value', '').strip().capitalize()
 
         def render_error(msg):
             flash(msg, 'error')
@@ -225,15 +232,9 @@ def patient_update():
         if not patient_id or not update_field or not update_value:
             return render_error('Patient ID, update field, and update value are required.')
 
-        if not re.match(r'^P\d{6}$', patient_id):
-            return render_error('Patient ID must follow the format P000001, P000002 ... P999999.')
-
         if update_field not in patient_fields:
             return render_error('Invalid patient field selected.')
 
-        existing_patient = fetch_one('SELECT patient_id FROM patients WHERE patient_id = %s', (patient_id,))
-        if not existing_patient:
-            return render_error('Patient was not found.')
 
         if update_field == 'age':
             try:
@@ -272,7 +273,6 @@ def patient_update():
         patient_ids=patient_ids
     )
 
-
 @app.route('/patient/<patient_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_patient(patient_id):
@@ -294,8 +294,8 @@ def edit_patient(patient_id):
             request.form['contact_number'].strip(),
             patient_id,
         ))
-        mysql.connection.commit() # here the db changes permenantly saved without commit changes stay in memory
-        cur.close() # releases the database resources
+        mysql.connection.commit() 
+        cur.close()
         flash('Patient updated successfully.', 'success')
         return redirect(url_for('patient_update'))
 
@@ -340,7 +340,6 @@ def register_sample():
                 mode='create'
             )
 
-        # 1. Required fields 
         if not sample_id or not patient_id or not sample_type or not test or not collection_date or not referring_doctor or not referring_hospital:
             return render_error('All fields are required.')
 
@@ -351,11 +350,9 @@ def register_sample():
         if not patient:
             return render_error('Selected patient does not exist.')
 
-        # 4. Sample type whitelist 
         if sample_type not in ['Blood', 'Swab', 'Tissue']:
             return render_error('Invalid sample type.')
 
-        #  5. Date must not be in the future 
         try:
             if date.fromisoformat(collection_date) > date.today():
                 return render_error('Collection date cannot be in the future.')
@@ -397,20 +394,7 @@ def sample_update():
         'referring_doctor': 'Referring Doctor',
         'referring_hospital': 'Referring Hospital',
     }
-    def get_dropdown_data():
-        samples = fetch_all("""
-            SELECT s.sample_id, p.patient_name
-            FROM samples s
-            JOIN patients p ON p.patient_id = s.patient_id
-            ORDER BY s.sample_id
-        """)
-        patients = fetch_all("""
-            SELECT patient_id, patient_name
-            FROM patients
-            ORDER BY patient_id
-        """)
-        return samples, patients
-
+    
 
     if request.method == 'POST':
         sample_id = request.form.get('sample_id', '').strip().upper()
@@ -423,24 +407,19 @@ def sample_update():
             flash(" Sample ID must follow the format S000001...S999999",'error')
         
         else:
-            # Check if sample exists in database
             sample_check = fetch_one('SELECT sample_id FROM samples WHERE sample_id = %s', (sample_id,))
             if not sample_check:
                 flash('Sample was not found.', 'error')
                 
-            # Check patient validity if updating patient_id
             elif update_field == 'patient_id' and not fetch_one('SELECT patient_id FROM patients WHERE patient_id = %s', (update_value,)):
                 flash('Selected patient does not exist.', 'error')
                 
-            # Check sample type dropdown values
             elif update_field == 'sample_type' and update_value not in ['Blood', 'Swab', 'Tissue']:
                 flash('Sample type must be Blood, Swab, or Tissue.', 'error')
                 
-            # Check date
             elif update_field == 'collection_date' and update_value > str(date.today()):
                 flash('Collection date cannot be in the future.', 'error')
                 
-            # Check that text fields aren't completely blanked out
             elif update_field in ('referring_doctor', 'referring_hospital', 'test') and not update_value:
                 flash(f'{sample_fields[update_field]} cannot be empty.', 'error')
                 
@@ -465,7 +444,6 @@ def sample_update():
             sample_id=sample_id, update_field=update_field, update_value=update_value
         )
 
-    # 4. Handle standard GET request (initial page load)
     sample_ids = fetch_all("SELECT s.sample_id, p.patient_name FROM samples s JOIN patients p ON p.patient_id = s.patient_id ORDER BY s.sample_id")
     patient_ids = fetch_all("SELECT patient_id, patient_name FROM patients ORDER BY patient_id")
     
@@ -486,7 +464,6 @@ def edit_sample(sample_id):
         return redirect(url_for('sample_update'))
 
     if request.method == 'POST':
-        # getting form ddata 
         patient_id         = request.form['patient_id'].strip()
         sample_type        = request.form['sample_type'].strip()
         test               = request.form['test'].strip()
@@ -663,7 +640,7 @@ def report():
     return render_template('report_menu.html')
 
 
-@app.route('/report')
+@app.route('/report/list')
 @login_required
 def reporting():
     cursor = mysql.connection.cursor(DictCursor)
@@ -677,26 +654,40 @@ def reporting():
     reports = cursor.fetchall()
     cursor.close()
     return render_template('report_list.html', reports=reports)
-    
-@app.route('/report/create', methods=['GET', 'POST'])
+
+'''   
+@app.route('/report/download', methods=['GET', 'POST'])
 @login_required
 def create_report():
-    samples = fetch_all('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
+    samples = fetch_one('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
 
     if request.method == 'POST':
         report_id = generate_report_id()
         sample_id = request.form.get('sample_id', '').strip()
-        comments  = request.form.get('comments', '').strip()
+        comments  = request.form.get('comments', '')
+        
+        def render_error(msg):
+            flash(msg, 'error')
+            return render_template('report_create.html', samples=samples, report=None, mode='create')
 
-        # validate sample
-        sample = fetch_one('SELECT * FROM samples WHERE sample_id = %s', (sample_id,))
+
+
+        # sample validation part 
+        sample = fetch_all('SELECT * FROM samples WHERE sample_id = %s', (sample_id,))
         if not sample:
             flash('Sample not found.', 'error')
-            return render_template('reporting.html', samples=samples, report=None, mode='create')
+            return render_template('report_create.html', samples=samples, report=None, mode='create')
+        
+        existing = fetch_one(
+            'SELECT report_id FROM patient_report WHERE sample_id = %s', (sample_id,)
+        )
+        if existing:
+            return render_error(f'A report already exists for sample {sample_id} (Report ID: {existing["report_id"]}).')
 
-        patient_id = sample['patient_id']  # auto-resolved
+        patient_id = sample['patient_id']
 
         cur = mysql.connection.cursor()
+
         try:
             cur.execute("""
                 INSERT INTO patient_report (report_id, patient_id, sample_id, comments, report_status)
@@ -709,11 +700,148 @@ def create_report():
             mysql.connection.rollback()
             print(e)
             flash('An unexpected error occurred.', 'error')
-            return render_template('reporting.html', samples=samples, report=None, mode='create')
+            return render_template('report_create.html', samples=samples, report=None, mode='create')
         finally:
             cur.close()
 
-    return render_template('reporting.html', samples=samples, report=None, mode='create')
+    sample=fetch_all(
+        'select * from samples where sample_id = %s'
+        (sample[0])
+    )
+    patient= fetch_one(
+        'select * from patients where patient_id=%s'
+        (sample[0],['patient_id'])
+    )
+    report_id= fetch_one(
+        'select report_id from patient_report where sample_id = %s '
+        (sample_id)
+    )
+    if not sample:
+        flash("Sample was not found.", "error")
+        return redirect(url_for('reporting'))
+
+    sample = fetch_one("""
+        SELECT *
+        FROM samples
+        WHERE sample_id = %s
+        ORDER BY collection_date DESC
+        LIMIT 1
+    """, (sample_id,))
+
+    if not sample:
+        flash("No sample found for this patient.", "error")
+        return redirect(url_for('reporting'))
+
+    html = render_template(
+        "report_pdf.html",
+        report_id=report_id,
+        patient=patient,
+        sample=sample,
+        comments=comments
+    )
+
+    pdf = HTML(string=html).write_pdf()
+
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename={sample_id}_draft.pdf"
+    )
+
+    return response
+'''
+@app.route('/report/create', methods=['GET', 'POST'])
+@login_required
+def create_report():
+    samples = fetch_all('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
+
+    if request.method == 'POST':
+        sample_id = request.form.get('sample_id', '').strip()
+        comments  = request.form.get('comments', '').strip()
+        signature_choice = request.form.get('signature', 'no')  # 'yes' or 'no'
+
+        def render_error(msg):
+            flash(msg, 'error')
+            return render_template('report_create.html', samples=samples, report=None, mode='create')
+
+        if not sample_id:
+            return render_error('Please select a sample.')
+
+        # fetch_one returns a dict
+        sample = fetch_one('SELECT * FROM samples WHERE sample_id = %s', (sample_id,))
+        if not sample:
+            return render_error('Sample not found.')
+
+        patient_id = sample['patient_id']
+        patient = fetch_one('SELECT * FROM patients WHERE patient_id = %s', (patient_id,))
+        if not patient:
+            return render_error('Patient not found.')
+
+        # Check if report already exists
+        existing = fetch_one(
+            'SELECT report_id FROM patient_report WHERE sample_id = %s', (sample_id,)
+        )
+
+        if existing:
+            report_id = existing['report_id']
+            # Update comments in database to reflect what is submitted
+            cur = mysql.connection.cursor()
+            try:
+                cur.execute("""
+                    UPDATE patient_report
+                    SET comments = %s, update_at = NOW()
+                    WHERE report_id = %s
+                """, (comments, report_id))
+                mysql.connection.commit()
+            except Exception as e:
+                mysql.connection.rollback()
+                print(e)
+            finally:
+                cur.close()
+        else:
+            report_id = generate_report_id()
+            cur = mysql.connection.cursor()
+            try:
+                cur.execute("""
+                    INSERT INTO patient_report (report_id, patient_id, sample_id, comments)
+                    VALUES (%s, %s, %s, %s)
+                """, (report_id, patient_id, sample_id, comments))
+                mysql.connection.commit()
+            except Exception as e:
+                mysql.connection.rollback()
+                print(e)
+                return render_error('An unexpected error occurred while saving.')
+            finally:
+                cur.close()
+
+        # Generate and download PDF
+        with_signature = (signature_choice == 'yes')
+        import os
+        project_dir = os.path.dirname(os.path.abspath(__file__))
+        signature_img_path = 'file:///' + os.path.join(project_dir, 'static', 'images', 'signature.png').replace('\\', '/')
+        html = render_template(
+            'report_pdf.html',
+            with_signature=with_signature,
+            signature_img_path=signature_img_path,
+            report_id=report_id,
+            patient=patient,
+            sample=sample,
+            comments=comments
+        )
+        try:
+            pdf = HTML(string=html, base_url=project_dir).write_pdf()
+            response = make_response(pdf)
+            response.headers['Content-Type'] = 'application/pdf'
+            response.headers['Content-Disposition'] = f'attachment; filename={sample_id}_report.pdf'
+            return response
+        except Exception as e:
+            print(f"WeasyPrint PDF generation error: {e}")
+            flash('Error generating PDF report.', 'error')
+            return render_template('report_create.html', samples=samples, report=None, mode='create')
+
+    return render_template('report_create.html', samples=samples, report=None, mode='create')
+
+# report edit for particular report id
 @app.route('/report/<report_id>/edit', methods=['GET', 'POST'])
 @login_required 
 def edit_report(report_id):
@@ -747,7 +875,7 @@ def edit_report(report_id):
 
     patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
     return render_template(
-        'reporting.html',
+        'report_edit.html',
         patients=patients,
         report=report,
         mode='edit'
@@ -764,7 +892,7 @@ def search_report():
     if request.method == 'POST':
         searched = True
         report_id = request.form.get('report_id', '').strip()
-        patient_id = request.form.get('patient_id', '').strip()
+        patient_id = request.form.get('patient_name', '').strip()
         created_at = request.form.get('created_at', '').strip()
         
         sql = """
@@ -796,13 +924,15 @@ def search_report():
             #sql += " ORDER BY pr.created_at DESC"
         results = fetch_all(sql, tuple(params))
     print("Results:", results)
+
+    with_signature = request.args.get("signature") == "yes"
     return render_template(
         'report_search.html',
         results=results,
         report_id=report_id,
         patient_id=patient_id,
         created_at=created_at,
-        searched=searched
+        searched=searched,
     )
 
 
@@ -843,15 +973,19 @@ def draft_print():
         flash("No sample found for this patient.", "error")
         return redirect(url_for('reporting'))
 
+    import os
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+    signature_img_path = 'file:///' + os.path.join(project_dir, 'static', 'images', 'signature.png').replace('\\', '/')
     html = render_template(
         "report_pdf.html",
+        signature_img_path=signature_img_path,
         report_id=report_id,
         patient=patient,
         sample=sample,
         comments=comments
     )
 
-    pdf = HTML(string=html).write_pdf()
+    pdf = HTML(string=html, base_url=project_dir).write_pdf()
 
     response = make_response(pdf)
     response.headers["Content-Type"] = "application/pdf"

@@ -17,21 +17,22 @@
 
 <section class="form-panel">
     <form method="POST" class="form-grid">
-        <label>
-            Patient
-            <input 
+        <label for="patient_input">Patient</label>
+        <br>
+        <input 
             type="text" 
+            id="patient_input"
             name="patient_id"
             list="patient_list" 
-            placeholder="Type patient ID or name..." 
+            placeholder="Type patient ID ...." 
             value="{{ sample.patient_id if sample else '' }}" 
             required>
-            <datalist id="patient_list">
+
+        <datalist id="patient_list">
             {% for patient in patients %}
-            <option value="{{ patient.patient_id }}">{{ patient.patient_name }}</option>
+            <option value="{{ patient.patient_id }}">{{ patient.patient_id }}</option>
             {% endfor %}
-            </datalist>
-        </label>
+        </datalist>
         <br>
         <label>
             Sample Type

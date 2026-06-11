@@ -41,14 +41,15 @@
 
 <div class="section">
     <table>
+        
         <tr>
             <td class="label">Report ID</td>
             <td>{{ report_id }}</td>
         </tr>
 
         <tr>
-            <td class="label">Patient ID</td>
-            <td>{{ patient.patient_id }}</td>
+            <td class="label">Sample ID</td>
+            <td>{{ sample.sample_id }}</td>
         </tr>
 
         <tr>
@@ -70,6 +71,7 @@
             <td class="label">Contact Number</td>
             <td>{{ patient.contact_number }}</td>
         </tr>
+        
     </table>
 </div>
 <div class="section">
@@ -113,8 +115,16 @@
     <h3>Hospital</h3>
     <p>{{ sample.referring_hospital }}</p>
 </div>
-<div class="section" style="margin: top 2px;">
-    <p>_______________________</p>
+<div class="section signature">
+
+    {% if with_signature %}
+        <img src="{{ signature_img_path }}"
+             alt="Doctor Signature"
+             width="150">
+    {% else %}
+        <p>_______________________</p>
+    {% endif %}
+
     <p>Authorized Signature</p>
 </div>
 

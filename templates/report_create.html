@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Reporting{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Report Module</p>
+        <h1>{{ 'Update Report' if mode == 'edit' else 'Create Report' }}</h1>
+    </div>
+</section>
+
+<section class="form-panel">
+    <form method="POST" class="form-grid">
+        <label>
+            Sample ID
+        <input type="text" name="sample_id" list="sample-id-list"
+           value="{{ report.sample_id if report else '' }}"
+           {% if mode == 'edit' %}readonly{% endif %}
+           placeholder="e.g. S000001" required>
+        <datalist id="sample-id-list">
+            {% for s in samples %}
+            <option value="{{ s.sample_id }}">{{ s.sample_id }} — {{ s.patient_id }}</option>
+            {% endfor %}
+        </datalist>
+        </label>
+    
+
+        <br>
+
+            <label class="full-width">
+                Comments
+            <textarea
+            name="comments"
+            rows="4"
+            style="resize: none; width: 100%; max-width: 100%; box-sizing: border-box; height: 500px; font-size: medium;"
+            placeholder="Additional comments...">{{ report.comments if report else '' }}</textarea>
+            </label>
+
+        
+
+        <div >
+            <button
+                type="submit"
+                name="signature"
+                value="no"
+                class="button_1">
+                Without Signature
+            </button>
+        </div>
+        <div >
+            <button
+                type="submit"
+                name="signature"
+                value="yes"
+                class="button_2">
+                With Signature
+            </button>
+        </div>
+        
+    </form>
+    <br>
+
+</section>
+{% endblock %}

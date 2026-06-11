@@ -12,48 +12,28 @@
 </section>
 
 <section class="panel">
-    <h2 class="search-filter-grid">Search by Report ID </h2>
-    <form method="POST" class="search-filter-grid">
-        <label for="search-box">
-            <input type="search" id="search-box" name="report_id" value="{{ report_id }}" placeholder=" Type here...">
+    <form method="POST" class="form-grid">
+        <label class="full-width">
+            Report ID
+            <input type="search" id="search-box" name="report_id" value="{{ query }}" placeholder=" Type here...">
+        </label>
+        <br>
+        <label class="full-width">
+            Patient Name 
+            <input type="search" id="search-box" name="patient_id" value="{{ query }}" placeholder="Type here...">
+        </label>
+        <br>
+        <label class="full-width">
+        Search by date range
+        <input type="date" name="date_1" value="{{ created_at }}">
+        <br>
+        <input type="date" name="date_2" value="{{ created_at }}">
+
         </label>
         
-        <br>
-        <button type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <span>Search</span>
-        </button>
-    </form>
-</section>
-
-<section class="panel">
-    <h2 class="search-filter-grid">Search by Patient ID </h2>
-    <form method="POST" class="search-filter-grid">
-        <label for="search-box">
-            <input type="search" id="search-box" name="patient_id" value="{{ patient_id }}" placeholder="Type here...">
-        </label>
-        
-        <br>
-        <button type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <span>Search</span>
-        </button>
-    </form>
-</section>
-
-<section class="panel">
-    <h2 class="search-filter-grid">Search by Date Created </h2>
-    <form method="POST" class="search-filter-grid">
-       
-        <label for="start-date">
-            Date
-            <input type="date" id="created-at" name="created_at" value="{{ created_at }}">
-        </label>
-
-        <button type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <span>Search</span>
-        </button>
+        <div class="form-actions">
+            <button type="submit">Search</button>
+        </div>
     </form>
 </section>
 

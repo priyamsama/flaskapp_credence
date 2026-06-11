@@ -42,7 +42,8 @@ CREATE TABLE samples (
 
 CREATE TABLE patient_report (
     report_id      VARCHAR(20)                   PRIMARY KEY,
-    sample_id      VARCHAR(20)                   NOT NULL,
+    patient_id     VARCHAR(20)                   NOT NULL,
+    sample_id      VARCHAR(20)                   NOT NULL UNIQUE,
     draft_text     TEXT,
     final_text     TEXT,
     comments       TEXT,
@@ -52,6 +53,9 @@ CREATE TABLE patient_report (
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+    CONSTRAINT fk_report_patient
+        FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
+        ON DELETE CASCADE,
     CONSTRAINT fk_report_sample
         FOREIGN KEY (sample_id) REFERENCES samples(sample_id)
         ON DELETE CASCADE
