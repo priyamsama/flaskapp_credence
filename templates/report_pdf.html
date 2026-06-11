@@ -115,8 +115,16 @@
     <h3>Hospital</h3>
     <p>{{ sample.referring_hospital }}</p>
 </div>
-<div class="section" style="margin: top 2px;">
-    <p>_______________________</p>
+<div class="section signature">
+
+    {% if with_signature %}
+        <img src="{{ url_for('static', filename='images/signature.png') }}"
+             alt="Doctor Signature"
+             width="150">
+    {% else %}
+        <p>_______________________</p>
+    {% endif %}
+
     <p>Authorized Signature</p>
 </div>
 

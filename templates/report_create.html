@@ -52,9 +52,10 @@
             <button
                 type="submit"
                 class="button_2"
-                formaction="{{ url_for('draft_print') }}">
+                formaction="{{ {{ url_for('_report', sample_id=sample.sample_id, signature='yes') }}}}">
                 {{ 'Download Draft PDF' if mode == 'edit' else 'With Signature' }}            </button>
         </div>
+        
     </form>
     <br>
 

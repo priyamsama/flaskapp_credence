@@ -798,12 +798,13 @@ def create_report():
             return render_error('An unexpected error occurred while saving.')
         finally:
             cur.close()
+        with_signature = request.args.get("signature") == "yes"
 
         # download PDF if that button was clicked
         if action == 'download':
             html = render_template(
                 'report_pdf.html',
-                
+                with_signature=with_signature,
                 report_id=report_id,
                 patient=patient,
                 sample=sample,
@@ -903,13 +904,15 @@ def search_report():
             #sql += " ORDER BY pr.created_at DESC"
         results = fetch_all(sql, tuple(params))
     print("Results:", results)
+
+    with_signature = request.args.get("signature") == "yes"
     return render_template(
         'report_search.html',
         results=results,
         report_id=report_id,
         patient_id=patient_id,
         created_at=created_at,
-        searched=searched
+        searched=searched,
     )
 
 

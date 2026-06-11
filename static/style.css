@@ -794,3 +794,12 @@ tbody tr:hover {
         white-space: nowrap;
     }
 }
+.signature {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.signature img {
+    height: 60px;
+    object-fit: contain;
+}
