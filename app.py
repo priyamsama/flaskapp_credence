@@ -18,6 +18,7 @@ app = Flask(__name__)
 app.config.from_object(Config) # this line loads the configuration from config.py, including database credentials and secret key
 mysql = MySQL(app) #here its initialiize the mysql with flask app, so we can use  mysql.connection to interact with the db, by flask_mysqldb library
 
+#this fuction act as a gate keeper for the routes which requieres login
 
 def login_required(view):
     @wraps(view)
@@ -28,9 +29,11 @@ def login_required(view):
 
     return wrapped_view
 
+# these are the helper fuction fetch data fromt the db instead of repeating it 
 
 def fetch_all(query, params=()):
-    cur = mysql.connection.cursor(DictCursor)
+    cur = mysql.connection.cursor(DictCursor) #this line make each row comes as the form of dictionary 
+
     cur.execute(query, params)
     rows = cur.fetchall()
     cur.close()
@@ -43,6 +46,9 @@ def fetch_one(query, params=()):
     row = cur.fetchone()
     cur.close()
     return row
+
+# these functions used to generate unique ids for patient samples and reports
+
 
 def generate_patient_id():
     row = fetch_one("SELECT patient_id FROM patients ORDER BY LENGTH(patient_id) DESC, patient_id DESC LIMIT 1")
@@ -65,7 +71,7 @@ def generate_report_id():
     last_num = int(row['report_id'][1:])
     return f'R{last_num + 1:06d}'
 
-
+# this is the main route to the app login 
 @app.route('/')
 def index():
     if session.get('user_id') is not None:
