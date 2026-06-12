@@ -549,58 +549,7 @@ def edit_sample(sample_id):
             sample=selected_sample,
             mode='edit'
         )
-'''
-@app.route('/patient/search', methods=['GET', 'POST'])
-@login_required
-def patient_search():
-    results = []
-    patient_id = ''
-    patient_name = ''
-    searched = False
 
-    if request.method == 'POST':
-        searched = True
-        patient_id = request.form.get('patient_id', '').strip()
-        patient_name = request.form.get('patient_name', '').strip()
-        
-        sql = """
-            SELECT patient_id, patient_name, age, gender, contact_number, created_at
-            FROM patients
-        """
-        params = []
-        if not patient_id and not patient_name:
-            flash('Please enter a search term.', 'error')
-            return render_template(
-                'patient_search.html',
-                results=results,
-                patient_id=patient_id,
-                patient_name=patient_name,
-                searched=searched
-            )
-
-
-        if patient_name:
-            search_value = f'%{patient_name}%'
-            sql += """
-                WHERE patient_name LIKE %s
-                    
-            """
-            params.extend([search_value])
-
-        sql += " ORDER BY created_at DESC"
-        results = fetch_all(sql, tuple(params))
-
-        return render_template(
-        'patient_search.html',
-        results=results,
-        patient_id=patient_id,
-        patient_name=patient_name,
-        searched=searched
-        )
-    return render_template(
-        'patient_search.html'
-    )
-'''
 @app.route('/patient/search', methods=['GET'])
 @login_required
 def patient_search():
@@ -618,66 +567,7 @@ def patient_search_results():
             (f'%{query}%',)
         )
     return render_template('patient_search_results.html', results=results, query=query)
-'''
-@app.route('/sample/search', methods=['GET', 'POST'])
-@login_required
-def sample_search():
-    results = []
-    query = ''
-    sample_type = ''
-    start_date = ''
-    end_date = ''
-    searched = False
 
-    if request.method == 'POST':
-        searched = True
-        query = request.form.get('query', '').strip()
-        sample_type = request.form.get('sample_type', '').strip()  # ← add this
-        start_date = request.form.get('start_date', '').strip()
-        end_date = request.form.get('end_date', '').strip()
-        sql = """
-            SELECT s.sample_id, s.sample_type, s.collection_date, s.test, s.referring_doctor, s.referring_hospital, p.patient_id, p.patient_name
-            FROM samples s
-            JOIN patients p ON p.patient_id = s.patient_id
-        """
-        conditions = []
-        params = []
-
-        if query:
-            search_value = f'%{query}%'
-            conditions.append("""
-                (s.sample_id LIKE %s OR p.patient_id LIKE %s OR p.patient_name LIKE %s OR s.sample_type LIKE %s)
-            """)
-            params.extend([search_value, search_value, search_value,search_value])
-
-        if sample_type:
-            conditions.append("s.sample_type = %s")
-            params.append(sample_type)
-
-        if start_date:
-            conditions.append("s.collection_date >= %s")
-            params.append(start_date)
-
-        if end_date:
-            conditions.append("s.collection_date <= %s")
-            params.append(end_date)
-
-        if conditions:
-            sql += " WHERE " + " AND ".join(conditions)
-
-        sql += " ORDER BY s.collection_date DESC"
-        results = fetch_all(sql, tuple(params))
-
-    return render_template(
-        'search.html', 
-        results=results, 
-        query=query, 
-        start_date=start_date, 
-        end_date=end_date,
-        sample_type=sample_type,
-        searched=searched
-    )
-'''
 @app.route('/sample/search', methods=['GET'])
 @login_required
 def sample_search():
@@ -756,101 +646,7 @@ def reporting():
     cursor.close()
     return render_template('report_list.html', reports=reports)
 
-'''   
-@app.route('/report/download', methods=['GET', 'POST'])
-@login_required
-def create_report():
-    samples = fetch_one('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
 
-    if request.method == 'POST':
-        report_id = generate_report_id()
-        sample_id = request.form.get('sample_id', '').strip()
-        comments  = request.form.get('comments', '')
-        
-        def render_error(msg):
-            flash(msg, 'error')
-            return render_template('report_create.html', samples=samples, report=None, mode='create')
-
-
-
-        # sample validation part 
-        sample = fetch_all('SELECT * FROM samples WHERE sample_id = %s', (sample_id,))
-        if not sample:
-            flash('Sample not found.', 'error')
-            return render_template('report_create.html', samples=samples, report=None, mode='create')
-        
-        existing = fetch_one(
-            'SELECT report_id FROM patient_report WHERE sample_id = %s', (sample_id,)
-        )
-        if existing:
-            return render_error(f'A report already exists for sample {sample_id} (Report ID: {existing["report_id"]}).')
-
-        patient_id = sample['patient_id']
-
-        cur = mysql.connection.cursor()
-
-        try:
-            cur.execute("""
-                INSERT INTO patient_report (report_id, patient_id, sample_id, comments, report_status)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (report_id, patient_id, sample_id, comments, 'Pending'))
-            mysql.connection.commit()
-            flash('Report created successfully.', 'success')
-            return redirect(url_for('reporting'))
-        except Exception as e:
-            mysql.connection.rollback()
-            print(e)
-            flash('An unexpected error occurred.', 'error')
-            return render_template('report_create.html', samples=samples, report=None, mode='create')
-        finally:
-            cur.close()
-
-    sample=fetch_all(
-        'select * from samples where sample_id = %s'
-        (sample[0])
-    )
-    patient= fetch_one(
-        'select * from patients where patient_id=%s'
-        (sample[0],['patient_id'])
-    )
-    report_id= fetch_one(
-        'select report_id from patient_report where sample_id = %s '
-        (sample_id)
-    )
-    if not sample:
-        flash("Sample was not found.", "error")
-        return redirect(url_for('reporting'))
-
-    sample = fetch_one("""
-        SELECT *
-        FROM samples
-        WHERE sample_id = %s
-        ORDER BY collection_date DESC
-        LIMIT 1
-    """, (sample_id,))
-
-    if not sample:
-        flash("No sample found for this patient.", "error")
-        return redirect(url_for('reporting'))
-
-    html = render_template(
-        "report_pdf.html",
-        report_id=report_id,
-        patient=patient,
-        sample=sample,
-        comments=comments
-    )
-
-    pdf = HTML(string=html).write_pdf()
-
-    response = make_response(pdf)
-    response.headers["Content-Type"] = "application/pdf"
-    response.headers["Content-Disposition"] = (
-        f"attachment; filename={sample_id}_draft.pdf"
-    )
-
-    return response
-'''
 @app.route('/report/create', methods=['GET', 'POST'])
 @login_required
 def create_report():
@@ -1037,67 +833,6 @@ def search_report():
         created_at=created_at,
         searched=searched,
     )
-
-
-'''
-@app.route('/report/download', methods=['POST'])
-@login_required
-def draft_print():
-    sample_id = request.form['sample_id'].strip().upper()
-    comments = request.form['comments']
-
-    sample = fetch_all(
-        "SELECT * FROM samples WHERE sample_id = %s",
-        (sample_id,)
-    )
-    patient = fetch_one(
-        "SELECT * FROM patients WHERE patient_id = %s",
-        (sample[0]['patient_id'],)
-    )
-    report_id = fetch_one(
-        "SELECT report_id FROM patient_report WHERE sample_id = %s",
-        (sample_id,)
-    )
-    
-
-    if not sample:
-        flash("Sample was not found.", "error")
-        return redirect(url_for('reporting'))
-
-    sample = fetch_one("""
-        SELECT *
-        FROM samples
-        WHERE sample_id = %s
-        ORDER BY collection_date DESC
-        LIMIT 1
-    """, (sample_id,))
-
-    if not sample:
-        flash("No sample found for this patient.", "error")
-        return redirect(url_for('reporting'))
-
-    import os
-    project_dir = os.path.dirname(os.path.abspath(__file__))
-    signature_img_path = 'file:///' + os.path.join(project_dir, 'static', 'images', 'signature.png').replace('\\', '/')
-    html = render_template(
-        "report_pdf.html",
-        signature_img_path=signature_img_path,
-        report_id=report_id,
-        patient=patient,
-        sample=sample,
-        comments=comments
-    )
-
-    pdf = HTML(string=html, base_url=project_dir).write_pdf()
-
-    response = make_response(pdf)
-    response.headers["Content-Type"] = "application/pdf"
-    response.headers["Content-Disposition"] = (
-        f"attachment; filename={sample_id}_draft.pdf"
-    )
-
-    return response'''
-
 
 
 if __name__ == '__main__':

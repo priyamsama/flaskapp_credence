@@ -3,6 +3,13 @@
 {% block title %}Update Patients{% endblock %}
 
 {% block content %}
+<section class="breadcrumb">
+    <a href="{{ url_for('dashboard') }}">Home</a>
+    <span>/</span>
+    <a href="{{ url_for('patient') }}">Patients</a>
+    <span>/</span>
+    <span>Update</span>
+</section>
 <section class="page-header">
     <div>
         <p class="eyebrow">Patient Module</p>

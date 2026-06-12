@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Search Samples{% endblock %}
 {% block content %}
+<section class="breadcrumb">
+    <a href="{{ url_for('dashboard') }}">Home</a>
+    <span>/</span>
+    <a href="{{ url_for('sample') }}">Samples</a>
+    <span>/</span>
+    <span>Search Samples</span>
+</section>
 
 <section class="page-header">
     <div>

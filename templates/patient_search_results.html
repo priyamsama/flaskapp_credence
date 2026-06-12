@@ -2,6 +2,16 @@
 {% block title %}Search Results{% endblock %}
 {% block content %}
 
+<section class="breadcrumb">
+    <a href="{{ url_for('dashboard') }}">Home</a>
+    <span>/</span>
+    <a href="{{ url_for('patient') }}">Patients</a>
+    <span>/</span>
+    <a href="{{ url_for('sample_search') }}">Search</a>
+    <span>/</span>
+    <span>Search Results</span>
+</section>
+
 <section class="page-header">
     <div>
         <p class="eyebrow">Patient Module</p>
@@ -28,7 +38,7 @@
         <tbody>
             {% for patient in results %}
             <tr>
-                <td><a>{{ patient.patient_id }}</a></td>
+                <td><strong style="color: blue;">{{ patient.patient_id }}</strong></td>
                 <td><strong>{{ patient.patient_name }}</strong></td>
                 <td>{{ patient.age }}</td>
                 <td>{{ patient.gender }}</td>
