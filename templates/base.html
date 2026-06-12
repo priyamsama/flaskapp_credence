@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Patient Sample System{% endblock %}</title>
-    <!-- Google Fonts Inter -->
+    <title>{% block title %}Patient Sample Registering Portal {% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +14,7 @@
     <aside class="sidebar">
         <div class="brand">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="brand-icon"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-            <span>Patient Sample System </span>
+            <span>Patient Sample Register portal </span>
         </div>
         <nav>
             <a href="{{ url_for('dashboard') }}" class="{% if request.path == url_for('dashboard') %}active{% endif %}">

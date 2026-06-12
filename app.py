@@ -74,7 +74,7 @@ def generate_report_id():
     last_num = int(row['report_id'][1:])
     return f'R{last_num + 1:06d}'
 
-def generate_sample_name():
+'''def generate_sample_name():
     while True:
 
         random_number= random.randint(000000,999999)
@@ -84,7 +84,8 @@ def generate_sample_name():
         existing_samples=fetch_one('select * from samples where sample_name = %s ',(sample_name))
 
         if not existing_samples:
-            return sample_name
+            return sample_name'''
+
 
 # this is the main route to the app login 
 @app.route('/')
@@ -154,8 +155,7 @@ def dashboard():
 @app.route('/patient')
 @login_required
 def patient():
-    patients= fetch_all('SELECT *FROM patients ORDER BY created_at DESC LIMIT 10' )
-    return render_template('patient_menu.html',patients=patients)
+    return render_template('patient_menu.html')
 
 
 @app.route('/patient/register', methods=['GET', 'POST'])
@@ -302,7 +302,7 @@ def patient_update():
         patient_fields=patient_fields,
         patient_ids=patient_ids
     )
-
+'''
 @app.route('/patient/<patient_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_patient(patient_id):
@@ -330,8 +330,7 @@ def edit_patient(patient_id):
         return redirect(url_for('patient_update'))
 
     return render_template('patient_register.html', patient=selected_patient, mode='edit')
-
-
+'''
 @app.route('/sample')
 @login_required
 def sample():
@@ -370,7 +369,7 @@ def register_sample():
                 mode='create'
             )
 
-        if not sample_id or not patient_id or not sample_type or not test or not collection_date or not referring_doctor or not referring_hospital:
+        if not patient_id or not sample_type or not test or not collection_date or not referring_doctor or not referring_hospital:
             return render_error('All fields are required.')
 
         
@@ -393,7 +392,7 @@ def register_sample():
         try:
             cur.execute("""
                 INSERT INTO samples (sample_id, patient_id, sample_type, test, collection_date, referring_doctor, referring_hospital)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s,%s)
             """, (sample_id, patient_id, sample_type, test, collection_date, referring_doctor, referring_hospital))
             mysql.connection.commit()
             flash('Sample registered successfully.', 'success')
@@ -484,7 +483,7 @@ def sample_update():
         patient_ids=patient_ids
     )
 
-
+'''
 @app.route('/sample/<sample_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_sample(sample_id):
@@ -548,7 +547,7 @@ def edit_sample(sample_id):
             patients=patients,
             sample=selected_sample,
             mode='edit'
-        )
+        )'''
 
 @app.route('/patient/search', methods=['GET'])
 @login_required
@@ -636,7 +635,7 @@ def report():
 def reporting():
     cursor = mysql.connection.cursor(DictCursor)
     cursor.execute('''
-        SELECT r.report_id, r.patient_id, p.patient_name, r.report_status,
+        SELECT r.report_id, r.sample_id, p.patient_name,
                r.created_at, r.update_at
         FROM patient_report r
         JOIN patients p ON r.patient_id = p.patient_id
@@ -651,6 +650,7 @@ def reporting():
 @login_required
 def create_report():
     samples = fetch_all('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
+    #date formating for report pdf 
     now = datetime.now()
     formatted_now = now.strftime("%A, %B %d, %Y - %I:%M %p")
     if request.method == 'POST':
@@ -711,6 +711,8 @@ def create_report():
                 return render_error('An unexpected error occurred while saving.')
             finally:
                 cur.close()
+        
+        
 
         #download PDF
         with_signature = (signature_choice == 'yes')
@@ -741,7 +743,7 @@ def create_report():
     return render_template('report_create.html', samples=samples, report=None, mode='create')
 
 # report edit for particular report id
-@app.route('/report/<report_id>/edit', methods=['GET', 'POST'])
+'''@app.route('/report/<report_id>/edit', methods=['GET', 'POST'])
 @login_required 
 def edit_report(report_id):
     report = fetch_one('SELECT * FROM patient_report WHERE report_id = %s', (report_id,))
@@ -774,11 +776,13 @@ def edit_report(report_id):
 
     patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
     return render_template(
-        'report_edit.html',
+        'report_edit.
+                <a href="{{ url_for('report') }}" class="{% if request.path.startswith('/report') %}active{% endif %}">html',
         patients=patients,
         report=report,
         mode='edit'
     )
+'''
 @app.route('/report/search', methods=['GET', 'POST'])
 @login_required
 def search_report():
