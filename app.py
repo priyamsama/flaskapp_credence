@@ -232,6 +232,7 @@ def register_patient():
 def patient_update():
     patient_fields = {
         'patient_name': 'Patient Name',
+        'id':'NIC',
         'age': 'Age',
         'gender': 'Gender',
         'contact_number': 'Contact Number',
@@ -245,7 +246,7 @@ def patient_update():
         def render_error(msg):
             flash(msg, 'error')
             patient_ids = fetch_all("""
-                SELECT patient_id, patient_name
+                SELECT patient_id, patient_name,id 
                 FROM patients
                 ORDER BY patient_id
             """)
@@ -280,6 +281,9 @@ def patient_update():
         elif update_field in ['contact_number', 'Contact Number']:
             if not re.match(r'^\d{10}$', update_value):
                 return render_error('Contact number must be exactly 10 digits long.')
+        elif update_field in ['id', 'NIC']:
+            if not re.match(r'^\d{10}$', update_value):
+                return render_error('enter a valid nic .')
 
 
         cur = mysql.connection.cursor()
@@ -343,6 +347,7 @@ def register_sample():
     if request.method == 'POST':
         sample_id = generate_sample_id()
         patient_id         = request.form['patient_id'].strip()
+        sample_name        = request.form['sample_name'].strip()
         sample_type        = request.form['sample_type'].strip()
         test               = request.form['test'].strip()
         collection_date    = request.form['collection_date'].strip()
@@ -354,6 +359,7 @@ def register_sample():
             submitted = {
                 'sample_id': sample_id,
                 'patient_id': patient_id,
+                'sample_name': sample_name,
                 'sample_type': sample_type,
                 'test': test,
                 'collection_date': collection_date,
@@ -369,9 +375,13 @@ def register_sample():
                 mode='create'
             )
 
-        if not patient_id or not sample_type or not test or not collection_date or not referring_doctor or not referring_hospital:
+        if not patient_id or not sample_name or not sample_type or not test or not collection_date or not referring_doctor or not referring_hospital:
             return render_error('All fields are required.')
 
+        # Check unique sample_name
+        existing_sample_name = fetch_one('SELECT sample_id FROM samples WHERE sample_name = %s', (sample_name,))
+        if existing_sample_name:
+            return render_error('A sample with this sample name already exists.')
         
         patient = fetch_one(
             'SELECT patient_id FROM patients WHERE patient_id = %s', (patient_id,)
@@ -391,9 +401,9 @@ def register_sample():
         cur = mysql.connection.cursor()
         try:
             cur.execute("""
-                INSERT INTO samples (sample_id, patient_id, sample_type, test, collection_date, referring_doctor, referring_hospital)
-                VALUES (%s, %s, %s, %s, %s, %s,%s)
-            """, (sample_id, patient_id, sample_type, test, collection_date, referring_doctor, referring_hospital))
+                INSERT INTO samples (sample_id, patient_id, sample_name, sample_type, test, collection_date, referring_doctor, referring_hospital)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (sample_id, patient_id, sample_name, sample_type, test, collection_date, referring_doctor, referring_hospital))
             mysql.connection.commit()
             flash('Sample registered successfully.', 'success')
             return redirect(url_for('register_sample'))
@@ -417,6 +427,7 @@ def register_sample():
 def sample_update():
     sample_fields = {
         'patient_id': 'Patient ID',
+        'sample_name': 'Sample Name',
         'sample_type': 'Sample Type',
         'test': 'Test',
         'collection_date': 'Collection Date',
@@ -449,7 +460,10 @@ def sample_update():
             elif update_field == 'collection_date' and update_value > str(date.today()):
                 flash('Collection date cannot be in the future.', 'error')
                 
-            elif update_field in ('referring_doctor', 'referring_hospital', 'test') and not update_value:
+            elif update_field == 'sample_name' and fetch_one('SELECT sample_id FROM samples WHERE sample_name = %s AND sample_id != %s', (update_value, sample_id)):
+                flash('A sample with this sample name already exists.', 'error')
+                
+            elif update_field in ('referring_doctor', 'referring_hospital', 'test', 'sample_name') and not update_value:
                 flash(f'{sample_fields[update_field]} cannot be empty.', 'error')
                 
             else:
@@ -464,7 +478,7 @@ def sample_update():
                 flash(f'{sample_fields[update_field]} updated successfully.', 'success')
                 return redirect(url_for('sample_update'))
 
-        sample_ids = fetch_all("SELECT s.sample_id, p.patient_name FROM samples s JOIN patients p ON p.patient_id = s.patient_id ORDER BY s.sample_id")
+        sample_ids = fetch_all("SELECT s.sample_id, s.sample_name, p.patient_name FROM samples s JOIN patients p ON p.patient_id = s.patient_id ORDER BY s.sample_id")
         patient_ids = fetch_all("SELECT patient_id, patient_name FROM patients ORDER BY patient_id")
         
         return render_template(
@@ -473,7 +487,7 @@ def sample_update():
             sample_id=sample_id, update_field=update_field, update_value=update_value
         )
 
-    sample_ids = fetch_all("SELECT s.sample_id, p.patient_name FROM samples s JOIN patients p ON p.patient_id = s.patient_id ORDER BY s.sample_id")
+    sample_ids = fetch_all("SELECT s.sample_id, s.sample_name, p.patient_name FROM samples s JOIN patients p ON p.patient_id = s.patient_id ORDER BY s.sample_id")
     patient_ids = fetch_all("SELECT patient_id, patient_name FROM patients ORDER BY patient_id")
     
     return render_template(
@@ -483,7 +497,7 @@ def sample_update():
         patient_ids=patient_ids
     )
 
-'''
+
 @app.route('/sample/<sample_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_sample(sample_id):
@@ -494,6 +508,7 @@ def edit_sample(sample_id):
 
     if request.method == 'POST':
         patient_id         = request.form['patient_id'].strip()
+        sample_name        = request.form['sample_name'].strip()
         sample_type        = request.form['sample_type'].strip()
         test               = request.form['test'].strip()
         collection_date    = request.form['collection_date'].strip()
@@ -503,6 +518,7 @@ def edit_sample(sample_id):
         submitted_sample={
         'sample_id':sample_id,
         'patient_id':patient_id,
+        'sample_name': sample_name,
         'sample_type': sample_type,
         'test': test,
         'collection_date':collection_date,
@@ -510,8 +526,7 @@ def edit_sample(sample_id):
         'referring_hospital':referring_hospital
         }
         
-        
-        if not (patient_id and sample_id and test and collection_date and referring_doctor and referring_hospital):
+        if not (patient_id and sample_name and test and collection_date and referring_doctor and referring_hospital):
             flash("All fields are required !",'error')
             patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
             return render_template('sample_register.html',patients=patients,sample=submitted_sample, mode="edit")
@@ -519,16 +534,23 @@ def edit_sample(sample_id):
             flash("Collection date cannot be in future ! ", 'error')
             patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
             return render_template('sample_register.html',patients=patients,sample=submitted_sample, mode="edit")
+        
+        # Check unique sample_name
+        existing_sample_name = fetch_one('SELECT sample_id FROM samples WHERE sample_name = %s AND sample_id != %s', (sample_name, sample_id))
+        if existing_sample_name:
+            flash('A sample with this sample name already exists.', 'error')
+            patients = fetch_all('SELECT patient_id, patient_name FROM patients ORDER BY patient_name')
+            return render_template('sample_register.html', patients=patients, sample=submitted_sample, mode='edit')
+        
         else:
-            
             try:
                 cur = mysql.connection.cursor()
                 cur.execute("""
                 UPDATE samples
-                SET patient_id = %s, sample_type = %s, test = %s,
+                SET patient_id = %s, sample_name = %s, sample_type = %s, test = %s,
                     collection_date = %s, referring_doctor = %s, referring_hospital = %s
                 WHERE sample_id = %s
-                """, (patient_id, sample_type, test, collection_date, referring_doctor, referring_hospital, sample_id))
+                """, (patient_id, sample_name, sample_type, test, collection_date, referring_doctor, referring_hospital, sample_id))
                 mysql.connection.commit()
                 cur.close()
 
@@ -547,7 +569,7 @@ def edit_sample(sample_id):
             patients=patients,
             sample=selected_sample,
             mode='edit'
-        )'''
+        )
 
 @app.route('/patient/search', methods=['GET'])
 @login_required
@@ -558,11 +580,11 @@ def patient_search():
 @app.route('/patient/search/results', methods=['GET', 'POST'])
 @login_required
 def patient_search_results():
-    query = request.form.get('patient_name', '').strip()
+    query = request.form.get('patient_name','id','').strip()
     results = []
     if query:
         results = fetch_all(
-            "SELECT * FROM patients WHERE patient_name LIKE %s ORDER BY patient_name",
+            "SELECT * FROM patients WHERE patient_name LIKE %s or id like %s ORDER BY patient_name",
             (f'%{query}%',)
         )
     return render_template('patient_search_results.html', results=results, query=query)
@@ -582,7 +604,7 @@ def sample_search_results():
     end_date    = request.form.get('end_date',     '').strip()
 
     sql = """
-        SELECT s.sample_id, s.sample_type, s.collection_date, s.test,
+        SELECT s.sample_id, s.sample_name, s.sample_type, s.collection_date, s.test,
                s.referring_doctor, s.referring_hospital,
                p.patient_id, p.patient_name
         FROM samples s
@@ -594,9 +616,9 @@ def sample_search_results():
     if query:
         search_value = f'%{query}%'
         conditions.append("""
-            (s.sample_id LIKE %s OR p.patient_id LIKE %s OR p.patient_name LIKE %s OR s.sample_type LIKE %s)
+            (s.sample_id LIKE %s OR s.sample_name LIKE %s OR p.patient_id LIKE %s OR p.patient_name LIKE %s OR s.sample_type LIKE %s)
         """)
-        params.extend([search_value, search_value, search_value, search_value])
+        params.extend([search_value, search_value, search_value, search_value, search_value])
 
     if sample_type:
         conditions.append("s.sample_type = %s")

@@ -27,6 +27,7 @@ CREATE TABLE patients (
 CREATE TABLE samples (
     sample_id          VARCHAR(20)                       PRIMARY KEY,
     patient_id         VARCHAR(20)                       NOT NULL,
+    sample_name        VARCHAR(50)                       NOT NULL UNIQUE,
     sample_type        ENUM('Blood', 'Swab', 'Tissue')   NOT NULL,
     test               VARCHAR(100)                      NOT NULL,
     collection_date    DATE                              NOT NULL,
@@ -79,24 +80,24 @@ INSERT INTO patients (patient_id, patient_name, age, gender, contact_number) VAL
 ('P000020', 'Ayesha Perera',         23, 'Female', '0712345620');
 
 
-INSERT INTO samples (sample_id, patient_id, sample_type, test, collection_date, referring_doctor, referring_hospital) VALUES
-('S000001', 'P000001', 'Blood',  'FBC',          '2026-06-01', 'Dr. Perera',    'Colombo General'),
-('S000002', 'P000002', 'Swab',   'Culture',      '2026-06-01', 'Dr. Silva',     'Nawaloka Hospital'),
-('S000003', 'P000003', 'Tissue', 'Biopsy',       '2026-06-02', 'Dr. Fernando',  'Lanka Hospital'),
-('S000004', 'P000004', 'Blood',  'Lipid Panel',  '2026-06-02', 'Dr. Jayawardena','Asiri Hospital'),
-('S000005', 'P000005', 'Swab',   'PCR',          '2026-06-03', 'Dr. Perera',    'Colombo General'),
-('S000006', 'P000006', 'Blood',  'Blood Sugar',  '2026-06-03', 'Dr. Perera',    'Nawaloka Hospital'),
-('S000007', 'P000007', 'Tissue', 'Biopsy',       '2026-06-04', 'Dr. Silva',     'Lanka Hospital'),
-('S000008', 'P000008', 'Blood',  'FBC',          '2026-06-04', 'Dr. Fernando',  'Asiri Hospital'),
-('S000009', 'P000009', 'Swab',   'Culture',      '2026-06-05', 'Dr. Jayawardena','Colombo General'),
-('S000010', 'P000010', 'Blood',  'Thyroid',      '2026-06-05', 'Dr. Perera',    'Nawaloka Hospital'),
-('S000011', 'P000011', 'Tissue', 'Biopsy',       '2026-06-06', 'Dr. Silva',     'Lanka Hospital'),
-('S000012', 'P000012', 'Swab',   'PCR',          '2026-06-06', 'Dr. Fernando',  'Colombo General'),
-('S000013', 'P000013', 'Blood',  'Liver Panel',  '2026-06-07', 'Dr. Jayawardena','Asiri Hospital'),
-('S000014', 'P000014', 'Tissue', 'Biopsy',       '2026-06-07', 'Dr. Perera',    'Nawaloka Hospital'),
-('S000015', 'P000015', 'Blood',  'FBC',          '2026-06-08', 'Dr. Silva',     'Colombo General'),
-('S000016', 'P000016', 'Swab',   'Culture',      '2026-06-08', 'Dr. Fernando',  'Lanka Hospital'),
-('S000017', 'P000017', 'Tissue', 'Biopsy',       '2026-06-09', 'Dr. Jayawardena','Asiri Hospital'),
-('S000018', 'P000018', 'Blood',  'Blood Sugar',  '2026-06-09', 'Dr. Perera',    'Nawaloka Hospital'),
-('S000019', 'P000019', 'Swab',   'PCR',          '2026-06-10', 'Dr. Silva',     'Colombo General'),
-('S000020', 'P000020', 'Blood',  'Thyroid',      '2026-06-10', 'Dr. Fernando',  'Lanka Hospital');
+INSERT INTO samples (sample_id, patient_id, sample_name, sample_type, test, collection_date, referring_doctor, referring_hospital) VALUES
+('S000001', 'P000001', 'Sample_S000001', 'Blood',  'FBC',          '2026-06-01', 'Dr. Perera',    'Colombo General'),
+('S000002', 'P000002', 'Sample_S000002', 'Swab',   'Culture',      '2026-06-01', 'Dr. Silva',     'Nawaloka Hospital'),
+('S000003', 'P000003', 'Sample_S000003', 'Tissue', 'Biopsy',       '2026-06-02', 'Dr. Fernando',  'Lanka Hospital'),
+('S000004', 'P000004', 'Sample_S000004', 'Blood',  'Lipid Panel',  '2026-06-02', 'Dr. Jayawardena','Asiri Hospital'),
+('S000005', 'P000005', 'Sample_S000005', 'Swab',   'PCR',          '2026-06-03', 'Dr. Perera',    'Colombo General'),
+('S000006', 'P000006', 'Sample_S000006', 'Blood',  'Blood Sugar',  '2026-06-03', 'Dr. Perera',    'Nawaloka Hospital'),
+('S000007', 'P000007', 'Sample_S000007', 'Tissue', 'Biopsy',       '2026-06-04', 'Dr. Silva',     'Lanka Hospital'),
+('S000008', 'P000008', 'Sample_S000008', 'Blood',  'FBC',          '2026-06-04', 'Dr. Fernando',  'Asiri Hospital'),
+('S000009', 'P000009', 'Sample_S000009', 'Swab',   'Culture',      '2026-06-05', 'Dr. Jayawardena','Colombo General'),
+('S000010', 'P000010', 'Sample_S000010', 'Blood',  'Thyroid',      '2026-06-05', 'Dr. Perera',    'Nawaloka Hospital'),
+('S000011', 'P000011', 'Sample_S000011', 'Tissue', 'Biopsy',       '2026-06-06', 'Dr. Silva',     'Lanka Hospital'),
+('S000012', 'P000012', 'Sample_S000012', 'Swab',   'PCR',          '2026-06-06', 'Dr. Fernando',  'Colombo General'),
+('S000013', 'P000013', 'Sample_S000013', 'Blood',  'Liver Panel',  '2026-06-07', 'Dr. Jayawardena','Asiri Hospital'),
+('S000014', 'P000014', 'Sample_S000014', 'Tissue', 'Biopsy',       '2026-06-07', 'Dr. Perera',    'Nawaloka Hospital'),
+('S000015', 'P000015', 'Sample_S000015', 'Blood',  'FBC',          '2026-06-08', 'Dr. Silva',     'Colombo General'),
+('S000016', 'P000016', 'Sample_S000016', 'Swab',   'Culture',      '2026-06-08', 'Dr. Fernando',  'Lanka Hospital'),
+('S000017', 'P000017', 'Sample_S000017', 'Tissue', 'Biopsy',       '2026-06-09', 'Dr. Jayawardena','Asiri Hospital'),
+('S000018', 'P000018', 'Sample_S000018', 'Blood',  'Blood Sugar',  '2026-06-09', 'Dr. Perera',    'Nawaloka Hospital'),
+('S000019', 'P000019', 'Sample_S000019', 'Swab',   'PCR',          '2026-06-10', 'Dr. Silva',     'Colombo General'),
+('S000020', 'P000020', 'Sample_S000020', 'Blood',  'Thyroid',      '2026-06-10', 'Dr. Fernando',  'Lanka Hospital');

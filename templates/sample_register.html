@@ -41,6 +41,16 @@
             {% endfor %}
         </datalist>
         <br>
+        <label for="sample_name_input">Sample Name</label>
+        <br>
+        <input 
+            type="text" 
+            id="sample_name_input"
+            name="sample_name"
+            placeholder="Type sample name ...." 
+            value="{{ sample.sample_name if sample else '' }}" 
+            required>
+        <br>
         <label>
             Sample Type
             <select name="sample_type" required>

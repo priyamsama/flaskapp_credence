@@ -46,6 +46,7 @@
         <label>
             New Value
             <input type="text" id="value-input-text" name="update_value" value="{{ update_value or '' }}" placeholder="Enter the new value" required>
+            <input type="number" id="value-input-id" name="update_value" min="0" max="10" placeholder="Enter NIC number" style="display: none;" disabled required>
             <input type="number" id="value-input-age" name="update_value" min="0" max="120" placeholder="Enter age (0-120)" style="display: none;" disabled required>
             <select id="value-input-gender" name="update_value" style="display: none;" disabled required>
                 <option value="">Select gender</option>

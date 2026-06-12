@@ -29,7 +29,7 @@
             <input type="text" name="sample_id" list="sample-id-list" value="{{ sample_id or '' }}" placeholder="Enter Sample ID" required>
             <datalist id="sample-id-list">
                 {% for sample in sample_ids %}
-                <option value="{{ sample.sample_id }}">{{ sample.patient_name }}</option>
+                <option value="{{ sample.sample_id }}">{{ sample.sample_name }} — {{ sample.patient_name }}</option>
                 {% endfor %}
             </datalist>
         </label>
