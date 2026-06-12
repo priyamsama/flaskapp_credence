@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Search Results{% endblock %}
+{% block content %}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Patient Module</p>
+        <h1>Results for "{{ query }}"</h1>
+    </div>
+    <a class="button secondary" href="{{ url_for('patient_search') }}">New Search</a>
+</section>
+
+<section class="panel">
+    <div class="panel-heading">
+        <h2>Search Results</h2>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Patient ID</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Contact</th>
+                <th> NIC </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in results %}
+            <tr>
+                <td><a>{{ patient.patient_id }}</a></td>
+                <td><strong>{{ patient.patient_name }}</strong></td>
+                <td>{{ patient.age }}</td>
+                <td>{{ patient.gender }}</td>
+                <td>{{ patient.contact_number }}</td>
+                <td>{{ patient.id}}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="empty">No matching patients found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}

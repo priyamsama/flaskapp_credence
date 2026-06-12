@@ -2,3 +2,4 @@ Flask
 Flask-MySQLdb
 python-dotenv
 weasyprint
+phonenumbers

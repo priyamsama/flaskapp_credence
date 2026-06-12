@@ -1,133 +1,362 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <style>
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
     body {
         font-family: Arial, sans-serif;
-        margin: 50px;
-        font-size: 14px;
+        font-size: 13px;
+        color: #0f172a;
+        background: #ffffff;
+        width: 210mm;
+        min-height: 297mm;
+        padding: 0;
     }
 
-    h1 {
-        text-align: center;
-        border-bottom: 2px solid black;
-        padding-bottom: 10px;
+    
+    .header {
+        background: #0f172a;
+        color: #ffffff;
+        padding: 28px 40px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
     }
 
-    .section {
-        margin-top: 25px;
+    .header-left h1 {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+        margin-bottom: 4px;
     }
 
-    .label {
-        font-weight: bold;
+    .header-left p {
+        font-size: 12px;
+        color: #94a3b8;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
     }
 
-    table {
+    .header-right {
+        text-align: right;
+    }
+
+    .header-right .report-id {
+        font-size: 18px;
+        font-weight: 700;
+        color: #818cf8;
+        letter-spacing: 0.02em;
+    }
+
+    .header-right .report-date {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-top: 4px;
+    }
+
+    
+    .accent-bar {
+        height: 4px;
+        background: linear-gradient(to right, #4f46e5, #818cf8, #c7d2fe);
+    }
+
+    
+    .body {
+        padding: 28px 40px;
+    }
+
+    
+    .section-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #4f46e5;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #e0e7ff;
+    }
+
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .info-row {
+        display: contents;
+    }
+
+    .info-label {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 10px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    .info-value {
+        background: #ffffff;
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 10px 16px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .info-label:last-of-type,
+    .info-value:last-of-type {
+        border-bottom: none;
+    }
+
+    
+    .test-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
     }
 
-    td {
-        padding: 10px;
-        border: 1px solid #333;
+    .test-table thead tr {
+        background: #4f46e5;
     }
+
+    .test-table thead th {
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 10px 16px;
+        text-align: left;
+        border: none;
+    }
+
+    .test-table tbody td {
+        padding: 11px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 13px;
+        color: #0f172a;
+    }
+
+    .test-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .test-table tbody tr:nth-child(even) td {
+        background: #f8fafc;
+    }
+
+   
+    .comments-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 14px 16px;
+        background: #f8fafc;
+        min-height: 60px;
+        font-size: 13px;
+        color: #0f172a;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+   
+    .signature-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-top: 8px;
+        padding-top: 16px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .referring-block p {
+        font-size: 13px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .referring-block span {
+        font-size: 11px;
+        color: #64748b;
+        display: block;
+        margin-top: 2px;
+    }
+
+    .signature-block {
+        text-align: right;
+    }
+
+    .signature-block img {
+        height: 52px;
+        object-fit: contain;
+        display: block;
+        margin-left: auto;
+        margin-bottom: 6px;
+    }
+
+    .signature-line {
+        width: 180px;
+        border-top: 1.5px solid #0f172a;
+        margin-left: auto;
+        margin-bottom: 4px;
+    }
+
+    .signature-block p {
+        font-size: 11px;
+        color: #64748b;
+        text-align: right;
+    }
+
+    .footer {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 12px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .footer p {
+        font-size: 10px;
+        color: #94a3b8;
+    }
+
+    .footer .confidential {
+        font-size: 10px;
+        font-weight: 700;
+        color: #4f46e5;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .spacer { margin-bottom: 20px; }
+    .spacer-sm { margin-bottom: 12px; }
 </style>
 </head>
-
 <body>
 
-<h1>Medical Laboratory Report</h1>
+<div class="header">
+    <div class="header-left">
+        <h1>Medical Laboratory Report</h1>
+        <p>Patient Test Report</p>
+    </div>
+    <div class="header-right">
+        <div class="report-id">{{ report_id }}</div>
+        <div class="report-date">{{ current_time }}</div>
+    </div>
+</div>
+<div class="accent-bar"></div>
 
+<div class="body">
 
-<div class="section">
-    <table>
+    <div class="spacer-sm"></div>
+    <div class="section-title">Patient Information</div>
+    <div class="info-grid">
+        <div class="info-label">Patient Name</div>
+        <div class="info-value">{{ patient.patient_name }}</div>
+
+        <div class="info-label">Age</div>
+        <div class="info-value">{{ patient.age }} years</div>
+
+        <div class="info-label">Gender</div>
+        <div class="info-value">{{ patient.gender }}</div>
+
+        <div class="info-label">Contact Number</div>
+        <div class="info-value">{{ patient.contact_number }}</div>
+    </div>
+
+    <div class="section-title">Sample Information</div>
+    <div class="info-grid">
+        <div class="info-label">Sample ID</div>
+        <div class="info-value">{{ sample.sample_id }}</div>
+
+        <div class="info-label">Sample Type</div>
+        <div class="info-value">{{ sample.sample_type }}</div>
+
+        <div class="info-label">Collection Date</div>
+        <div class="info-value">{{ sample.collection_date }}</div>
+
+        <div class="info-label">Test Requested</div>
+        <div class="info-value">{{ sample.test }}</div>
+    </div>
+
+    <!--  
+    <div class="section-title">Test Results</div>
+    <table class="test-table">
+        <thead>
+            <tr>
+                <th>Test Name</th>
+                <th>Result</th>
+                <th>Reference Range</th>
+                <th>Units</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ sample.test }}</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+            </tr>
+        </tbody>
+    </table>-->
+
+    <div class="section-title">Doctor's Comments</div>
+    <div class="comments-box">
+        {% if comments %}{{ comments }}{% else %}<span style="color:#94a3b8; font-style:italic;">No comments provided.</span>{% endif %}
+    </div>
+
+    <div class="signature-row">
+        <div class="referring-block">
+            <p>{{ sample.referring_doctor }}</p>
+            <span>Doctor</span>
+            <p style="margin-top:8px;">{{ sample.referring_hospital }}</p>
+            {% if with_signature %}
+                <img src="{{ signature_img_path }}" alt=" Doctor Signature" width="10">
+            {% endif %}
+        </div>
         
-        <tr>
-            <td class="label">Report ID</td>
-            <td>{{ report_id }}</td>
-        </tr>
-
-        <tr>
-            <td class="label">Sample ID</td>
-            <td>{{ sample.sample_id }}</td>
-        </tr>
-
-        <tr>
-            <td class="label">Patient Name</td>
-            <td>{{ patient.patient_name }}</td>
-        </tr>
-
-        <tr>
-            <td class="label">Age</td>
-            <td>{{ patient.age }}</td>
-        </tr>
-
-        <tr>
-            <td class="label">Gender</td>
-            <td>{{ patient.gender }}</td>
-        </tr>
-
-        <tr>
-            <td class="label">Contact Number</td>
-            <td>{{ patient.contact_number }}</td>
-        </tr>
-        
-    </table>
-</div>
-<div class="section">
-    <h3>Test Results</h3>
-    <table>
-        <tr>
-            <td class="label">Test Name</td>
-            <td>{{ sample.test }}</td>
-        </tr>
-
-        <tr>
-            <td class="label">Result</td>
-            <td></td>
-        </tr>
-
-        <tr>
-            <td class="label">Reference Range</td>
-            <td></td>
-        </tr>
-
-        <tr>
-            <td class="label">Units</td>
-            <td></td>
-        </tr>
-
-        <tr>
-            <td class="label">Date of Sample Collected: </td>
-            <td>{{sample.collection_date}}</td>
-        </tr>
-    </table>
+        <!--<div class="signature-block">
+            {% if with_signature %}
+                <img src="{{ signature_img_path }}" alt=" Doctor Signature" width="150">
+            {% endif %}
+            <div class="signature-line"></div>
+            <p>Authorized Signature</p>
+        </div>-->
+    </div>
 
 </div>
-<div class="section">
-    <h3>Doctor's Comments</h3>
-    <p>{{ comments }}</p>
-</div>
-<div class="section">
-    <h3>Doctor</h3>
-    <p>{{ sample.referring_doctor }}</p>
-</div><div class="section">
-    <h3>Hospital</h3>
-    <p>{{ sample.referring_hospital }}</p>
-</div>
-<div class="section signature">
 
-    {% if with_signature %}
-        <img src="{{ signature_img_path }}"
-             alt="Doctor Signature"
-             width="150">
-    {% else %}
-        <p>_______________________</p>
-    {% endif %}
-
-    <p>Authorized Signature</p>
-</div>
+<!-- Footer -->
+<!--<div class="footer">
+    <p>Report ID: {{ report_id }} &nbsp;|&nbsp; Sample ID: {{ sample.sample_id }}</p>
+    <p class="confidential">Confidential</p>
+</div>-->
 
 </body>
 </html>

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Sample Search Results{% endblock %}
+{% block content %}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Sample Module</p>
+        <h1>Search Results</h1>
+    </div>
+    <a class="button secondary" href="{{ url_for('sample_search') }}">New Search</a>
+</section>
+
+<section class="panel">
+    <div class="panel-heading">
+        <h2>
+            {% if query %}Results for "{{ query }}"{% else %}All Samples{% endif %}
+            {% if sample_type %} — Type: {{ sample_type }}{% endif %}
+            {% if start_date %} — From: {{ start_date }}{% endif %}
+            {% if end_date %} — To: {{ end_date }}{% endif %}
+        </h2>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Sample ID</th>
+                <th>Patient ID</th>
+                <th>Patient Name</th>
+                <th>Type</th>
+                <th>Test</th>
+                <th>Collection Date</th>
+                <th>Doctor</th>
+                <th>Hospital</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in results %}
+            <tr>
+                <td><a class="table-link" href="{{ url_for('edit_sample', sample_id=s.sample_id) }}">{{ s.sample_id }}</a></td>
+                <td>{{ s.patient_id }}</td>
+                <td><strong>{{ s.patient_name }}</strong></td>
+                <td>{{ s.sample_type }}</td>
+                <td>{{ s.test }}</td>
+                <td>{{ s.collection_date }}</td>
+                <td>{{ s.referring_doctor }}</td>
+                <td>{{ s.referring_hospital }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="empty">No matching samples found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}

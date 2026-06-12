@@ -44,12 +44,7 @@ CREATE TABLE patient_report (
     report_id      VARCHAR(20)                   PRIMARY KEY,
     patient_id     VARCHAR(20)                   NOT NULL,
     sample_id      VARCHAR(20)                   NOT NULL UNIQUE,
-    draft_text     TEXT,
-    final_text     TEXT,
     comments       TEXT,
-    signed_by      VARCHAR(100)                  NULL,
-    signature_path VARCHAR(255)                  NULL,
-    report_status  ENUM('Delivered', 'Pending')  NOT NULL DEFAULT 'Pending',
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 

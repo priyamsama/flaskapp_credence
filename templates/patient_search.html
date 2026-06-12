@@ -13,16 +13,12 @@
 
 
 <section class="panel">
-    <form method="POST" class="form-grid">
+    <form method="POST" class="form-grid" action="{{ url_for('patient_search_results') }}">
         <label class="full-width">
             Pateint Name
             <input type="search" id="search-box" name="patient_name" value="{{ query }}" placeholder=" Type here...">
         </label>
         <br>
-        <label class="full-width">
-            Patient ID
-            <input type="search" id="search-box" name="patient_id" value="{{ query }}" placeholder="Type here...">
-        </label>
         <br>
         <div class="form-actions">
             <button type="submit">Search</button>
@@ -30,37 +26,5 @@
     </form>
 </section>
 
-{% if searched %}
-<section class="panel">
-    <div class="panel-heading">
-        <h2>Search Results</h2>
-    </div>
-    <table>
-        <thead>
-            <tr>
-                <th>Patient ID</th>
-                <th>Name</th>
-                <th>Age</th>
-                <th>Gender</th>
-                <th>Contact</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for patient in results %}
-            <tr>
-                <td><a class="table-link" href="{{ url_for('edit_patient', patient_id=patient.patient_id) }}">{{ patient.patient_id }}</a></td>
-                <td><strong>{{ patient.patient_name }}</strong></td>
-                <td>{{ patient.age }}</td>
-                <td>{{ patient.gender }}</td>
-                <td>{{ patient.contact_number }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5" class="empty">No matching patients found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</section>
-{% endif %}
+
 {% endblock %}

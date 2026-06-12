@@ -1,5 +1,8 @@
 import re
-from datetime import date
+import random
+import phonenumbers
+from phonenumbers.phonenumberutil import NumberParseException 
+from datetime import date, datetime
 from functools import wraps
 from flask import render_template, make_response
 from weasyprint import HTML
@@ -70,6 +73,18 @@ def generate_report_id():
         return 'R000001'
     last_num = int(row['report_id'][1:])
     return f'R{last_num + 1:06d}'
+
+def generate_sample_name():
+    while True:
+
+        random_number= random.randint(000000,999999)
+        sample_name=f'SC{random_number}'
+
+        #chekig whether have an existing sample  name
+        existing_samples=fetch_one('select * from samples where sample_name = %s ',(sample_name))
+
+        if not existing_samples:
+            return sample_name
 
 # this is the main route to the app login 
 @app.route('/')
@@ -147,55 +162,70 @@ def patient():
 @login_required
 def register_patient():
     if request.method == 'POST':
-        patient_id = generate_patient_id()
-        patient_name = request.form['patient_name'].strip()
-        age_str = request.form['age'].strip()
-        gender = request.form['gender']
-        number = request.form['contact_number'].strip()
+        patient_id   = generate_patient_id()
+        patient_name = request.form['patient_name'].strip().capitalize()
+        nic          = request.form['id'].strip()
+        age_str      = request.form['age'].strip()
+        gender       = request.form['gender']
+        number       = request.form['contact_number'].strip()
 
         def render_error(msg):
             flash(msg, 'error')
             submitted = {
                 'patient_name': patient_name,
-                'age': age_str,
-                'gender': gender,
+                'id':           nic,
+                'age':          age_str,
+                'gender':       gender,
                 'contact_number': number
             }
             return render_template('patient_register.html', patient=submitted, mode='create')
 
-        if not patient_name or not patient_id or not age_str or not gender or not number:
+        if not patient_name or not age_str or not gender or not number:
             return render_error('All fields are required.')
 
-        
         try:
             age = int(age_str)
             if age < 0 or age > 120:
-                return render_error('Age must be a realistic number between 0 and 120.')
+                return render_error('Age must be between 0 and 120.')
         except ValueError:
             return render_error('Age must be a valid whole number.')
 
         if not re.match(r'^\d{10}$', number):
-            return render_error('Contact number must be exactly 10 digits long.')
+            return render_error('Contact number must be exactly 10 digits.')
+        
+        existing_patient = fetch_one("""
+            SELECT id, contact_number 
+            FROM patients 
+            WHERE id = %s OR contact_number = %s
+        """, (nic, number))
+
+        if existing_patient:
+            
+            if existing_patient[0] == nic:
+                return render_error('A patient with this NIC already exists.')
+            else:
+                return render_error('A patient with this contact number already exists.')
 
         cur = mysql.connection.cursor()
         try:
             cur.execute("""
-                INSERT INTO patients
-                (patient_id,patient_name, age, gender, contact_number)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (patient_id, patient_name, age, gender, number))
+                INSERT INTO patients (patient_id, patient_name, age, gender, contact_number, id)
+                VALUES (%s, %s, %s, %s, %s,%s)
+            """, (patient_id, patient_name, age, gender, number, nic))
             mysql.connection.commit()
             flash('Patient registered successfully.', 'success')
             return redirect(url_for('register_patient'))
+        except IntegrityError:
+            mysql.connection.rollback()
+            return render_error('A patient with this NIC already exists.')
         except Exception as e:
             mysql.connection.rollback()
-            print(e)                    # ← add this
+            print(e)
             return render_error('An unexpected error occurred during registration.')
         finally:
             cur.close()
 
     return render_template('patient_register.html', patient=None, mode='create')
-
 
 @app.route('/patient/update', methods=['GET', 'POST'])
 @login_required
@@ -519,7 +549,7 @@ def edit_sample(sample_id):
             sample=selected_sample,
             mode='edit'
         )
-
+'''
 @app.route('/patient/search', methods=['GET', 'POST'])
 @login_required
 def patient_search():
@@ -548,12 +578,6 @@ def patient_search():
                 searched=searched
             )
 
-        if patient_id:
-            search_value = f'%{patient_id}%'
-            sql += """
-                WHERE patient_id like %s
-            """
-            params.extend([search_value])
 
         if patient_name:
             search_value = f'%{patient_name}%'
@@ -566,15 +590,35 @@ def patient_search():
         sql += " ORDER BY created_at DESC"
         results = fetch_all(sql, tuple(params))
 
-    return render_template(
+        return render_template(
         'patient_search.html',
         results=results,
         patient_id=patient_id,
         patient_name=patient_name,
         searched=searched
+        )
+    return render_template(
+        'patient_search.html'
     )
+'''
+@app.route('/patient/search', methods=['GET'])
+@login_required
+def patient_search():
+    return render_template('patient_search.html')
 
 
+@app.route('/patient/search/results', methods=['GET', 'POST'])
+@login_required
+def patient_search_results():
+    query = request.form.get('patient_name', '').strip()
+    results = []
+    if query:
+        results = fetch_all(
+            "SELECT * FROM patients WHERE patient_name LIKE %s ORDER BY patient_name",
+            (f'%{query}%',)
+        )
+    return render_template('patient_search_results.html', results=results, query=query)
+'''
 @app.route('/sample/search', methods=['GET', 'POST'])
 @login_required
 def sample_search():
@@ -633,6 +677,63 @@ def sample_search():
         sample_type=sample_type,
         searched=searched
     )
+'''
+@app.route('/sample/search', methods=['GET'])
+@login_required
+def sample_search():
+    return render_template('search.html')
+
+
+@app.route('/sample/search/results', methods=['POST'])
+@login_required
+def sample_search_results():
+    query       = request.form.get('query',       '').strip()
+    sample_type = request.form.get('sample_type', '').strip()
+    start_date  = request.form.get('start_date',  '').strip()
+    end_date    = request.form.get('end_date',     '').strip()
+
+    sql = """
+        SELECT s.sample_id, s.sample_type, s.collection_date, s.test,
+               s.referring_doctor, s.referring_hospital,
+               p.patient_id, p.patient_name
+        FROM samples s
+        JOIN patients p ON p.patient_id = s.patient_id
+    """
+    conditions = []
+    params = []
+
+    if query:
+        search_value = f'%{query}%'
+        conditions.append("""
+            (s.sample_id LIKE %s OR p.patient_id LIKE %s OR p.patient_name LIKE %s OR s.sample_type LIKE %s)
+        """)
+        params.extend([search_value, search_value, search_value, search_value])
+
+    if sample_type:
+        conditions.append("s.sample_type = %s")
+        params.append(sample_type)
+
+    if start_date:
+        conditions.append("s.collection_date >= %s")
+        params.append(start_date)
+
+    if end_date:
+        conditions.append("s.collection_date <= %s")
+        params.append(end_date)
+
+    if conditions:
+        sql += " WHERE " + " AND ".join(conditions)
+
+    sql += " ORDER BY s.collection_date DESC"
+    results = fetch_all(sql, tuple(params))
+
+    return render_template('sample_search_results.html',
+        results=results,
+        query=query,
+        sample_type=sample_type,
+        start_date=start_date,
+        end_date=end_date)
+
 
 @app.route('/report')
 @login_required
@@ -754,7 +855,8 @@ def create_report():
 @login_required
 def create_report():
     samples = fetch_all('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
-
+    now = datetime.now()
+    formatted_now = now.strftime("%A, %B %d, %Y - %I:%M %p")
     if request.method == 'POST':
         sample_id = request.form.get('sample_id', '').strip()
         comments  = request.form.get('comments', '').strip()
@@ -784,7 +886,7 @@ def create_report():
 
         if existing:
             report_id = existing['report_id']
-            # Update comments in database to reflect what is submitted
+            # if the sample id is already exist then it will updte thh commt section
             cur = mysql.connection.cursor()
             try:
                 cur.execute("""
@@ -814,7 +916,7 @@ def create_report():
             finally:
                 cur.close()
 
-        # Generate and download PDF
+        #download PDF
         with_signature = (signature_choice == 'yes')
         import os
         project_dir = os.path.dirname(os.path.abspath(__file__))
@@ -826,7 +928,8 @@ def create_report():
             report_id=report_id,
             patient=patient,
             sample=sample,
-            comments=comments
+            comments=comments,
+            current_time=formatted_now
         )
         try:
             pdf = HTML(string=html, base_url=project_dir).write_pdf()
@@ -936,7 +1039,7 @@ def search_report():
     )
 
 
-
+'''
 @app.route('/report/download', methods=['POST'])
 @login_required
 def draft_print():
@@ -993,7 +1096,7 @@ def draft_print():
         f"attachment; filename={sample_id}_draft.pdf"
     )
 
-    return response
+    return response'''
 
 
 

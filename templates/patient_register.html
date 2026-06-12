@@ -3,6 +3,15 @@
 {% block title %}Patients{% endblock %}
 
 {% block content %}
+
+<section class="breadcrumb">
+    <a href="{{ url_for('dashboard') }}">Home</a>
+    <span>/</span>
+    <span >Patients</span>
+    <span>/</span>
+    <span>Register</span>
+</section>
+
 <section class="page-header">
     <div>
         <p class="eyebrow">Patient Module</p>
@@ -15,6 +24,7 @@
         </label>
     {% else %}
     {% endif %}
+    
 </section>
 
 <section class="form-panel">
@@ -23,7 +33,10 @@
             Patient Name
             <input type="text" name="patient_name" value="{{ patient.patient_name if patient else '' }}" placeholder="e.g. John Doe" required>
         </label>
-
+        <label>
+            Patient NIC
+            <input type="text" name="id" value="{{ patient.NIC if patient else '' }}" placeholder="NIC number here.. ">
+        </label>
         <label>
             Age
             <input type="number" name="age" min="0" max="120" value="{{ patient.age if patient else '' }}" placeholder="e.g. 30" required>

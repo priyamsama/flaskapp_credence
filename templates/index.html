@@ -56,7 +56,7 @@
         <tbody>
             {% for sample in recent_samples %}
             <tr>
-                <td><strong class="table-link">{{ sample.sample_id }}</strong></td>
+                <td><strong style="color: rgb(70, 70, 167);">{{ sample.sample_id }}</strong></td>
                 <td>{{ sample.patient_name }} ({{ sample.patient_id }})</td>
                 <td>
                     <span class="badge badge-{{ sample.sample_type|lower }}">{{ sample.sample_type }}</span>

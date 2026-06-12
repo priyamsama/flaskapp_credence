@@ -1,8 +1,7 @@
 {% extends "base.html" %}
-
 {% block title %}Search Samples{% endblock %}
-
 {% block content %}
+
 <section class="page-header">
     <div>
         <p class="eyebrow">Sample Module</p>
@@ -12,75 +11,32 @@
 </section>
 
 <section class="panel">
-    <form method="POST" class="form-grid">
-    <label class="full-width">
-        Sample ID / Patient ID
-        <input type="search" name="query" value="{{ query }}" placeholder="e.g. S000001 or P000001">
-    </label>
+    <form method="POST" class = "form-grid"action="{{ url_for('sample_search_results') }}" class="form-grid">
 
-    <label class="full-width">
-        Sample Type
-        <select name="sample_type">
-            <option value="">All Types</option>
-            {% for t in ['Blood', 'Swab', 'Tissue'] %}
-            <option value="{{ t }}" {% if sample_type == t %}selected{% endif %}>{{ t }}</option>
-            {% endfor %}
-        </select>
-    </label>
+        <label class="full-width">Search by Sample ID
+            <input type="search" name="query" placeholder="Sample ID.">
+        </label>
 
-    <label class="full-width">
-        Start Date
-        <input type="date" name="start_date" value="{{ start_date }}">
-    </label>
+        <label>Sample Type
+            <select name="sample_type">
+                <option value="">All Types</option>
+                <option value="Blood">Blood</option>
+                <option value="Swab">Swab</option>
+                <option value="Tissue">Tissue</option>
+            </select>
+        </label>
+        <br>
+        <label>From Date
+            <input type="date" name="start_date">
+        </label>
+        <label>To Date
+            <input type="date" name="end_date">
+        </label>
 
-    <label class="full-width">
-        End Date
-        <input type="date" name="end_date" value="{{ end_date }}">
-    </label>
-
-    <div class="form-actions">
-        <button type="submit">Search</button>
-    </div>
-</form>
+        <div class="form-actions">
+            <button type="submit">Search</button>
+        </div>
+    </form>
 </section>
-<br>
-{% if searched %}
-<section class="panel">
-    <div class="panel-heading">
-        <h2>Search Results</h2>
-    </div>
-    <table>
-        <thead>
-            <tr>
-                <th>Sample ID</th>
-                <th>Patient</th>
-                <th>Type</th>
-                <th>Collection Date</th>
-                <th>Test</th>
-                <th>Referring Doctor</th>
-                <th>Referring Hospital</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for sample in results %}
-            <tr>
-                <td><a class="table-link" href="{{ url_for('edit_sample', sample_id=sample.sample_id) }}">{{ sample.sample_id }}</a></td>
-                <td><strong>{{ sample.patient_name }}</strong> ({{ sample.patient_id }})</td>
-                <td>
-                    <span class="badge badge-{{ sample.sample_type|lower }}">{{ sample.sample_type }}</span>
-                </td>
-                <td>{{ sample.collection_date }}</td>
-                <td>{{ sample.test }}</td>
-                <td>{{ sample.referring_doctor }}</td>
-                <td>{{ sample.referring_hospital }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="7" class="empty">No matching samples found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</section>
-{% endif %}
+
 {% endblock %}
