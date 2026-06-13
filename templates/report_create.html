@@ -13,14 +13,14 @@
 <section class="form-panel">
     <form method="POST" class="form-grid">
         <label>
-            Sample ID
+            Sample ID or Sample Name
         <input type="text" name="sample_id" list="sample-id-list"
            value="{{ report.sample_id if report else '' }}"
            {% if mode == 'edit' %}readonly{% endif %}
-           placeholder="e.g. S000001" required>
+           placeholder="e.g. S000001 or Blood Test Sample 1" required>
         <datalist id="sample-id-list">
             {% for s in samples %}
-            <option value="{{ s.sample_id }}">{{ s.sample_id }} — {{ s.patient_id }}</option>
+            <option value="{{ s.sample_id }}">{{ s.sample_id }} — {{ s.sample_name }}</option>
             {% endfor %}
         </datalist>
         </label>

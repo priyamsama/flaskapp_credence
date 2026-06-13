@@ -671,7 +671,7 @@ def reporting():
 @app.route('/report/create', methods=['GET', 'POST'])
 @login_required
 def create_report():
-    samples = fetch_all('SELECT sample_id, sample_type, patient_id FROM samples ORDER BY sample_id')
+    samples = fetch_all('SELECT sample_id, sample_name, sample_type, patient_id FROM samples ORDER BY sample_id')
     #date formating for report pdf 
     now = datetime.now()
     formatted_now = now.strftime("%A, %B %d, %Y - %I:%M %p")
@@ -687,10 +687,12 @@ def create_report():
         if not sample_id:
             return render_error('Please select a sample.')
 
-        # fetch_one returns a dict
-        sample = fetch_one('SELECT * FROM samples WHERE sample_id = %s', (sample_id,))
+        # fetch_one returns a dict, supports looking up by ID or Name
+        sample = fetch_one('SELECT * FROM samples WHERE sample_id = %s OR sample_name = %s', (sample_id, sample_id))
         if not sample:
             return render_error('Sample not found.')
+
+        sample_id = sample['sample_id']
 
         patient_id = sample['patient_id']
         patient = fetch_one('SELECT * FROM patients WHERE patient_id = %s', (patient_id,))
@@ -850,7 +852,6 @@ def search_report():
         results = fetch_all(sql, tuple(params))
     print("Results:", results)
 
-    with_signature = request.args.get("signature") == "yes"
     return render_template(
         'report_search.html',
         results=results,
