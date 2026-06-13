@@ -1,7 +1,6 @@
 import re
 import random
-import phonenumbers
-from phonenumbers.phonenumberutil import NumberParseException 
+
 from datetime import date, datetime
 from functools import wraps
 from flask import render_template, make_response
@@ -319,13 +318,14 @@ def edit_patient(patient_id):
         cur = mysql.connection.cursor()
         cur.execute("""
             UPDATE patients
-            SET patient_name = %s, age = %s, gender = %s, contact_number = %s
+            SET patient_name = %s, age = %s, gender = %s, contact_number = %s, id = %s
             WHERE patient_id = %s
         """, (
             request.form['patient_name'].strip(),
             request.form['age'],
             request.form['gender'],
             request.form['contact_number'].strip(),
+            request.form['id'].strip(),
             patient_id,
         ))
         mysql.connection.commit() 
@@ -580,12 +580,12 @@ def patient_search():
 @app.route('/patient/search/results', methods=['GET', 'POST'])
 @login_required
 def patient_search_results():
-    query = request.form.get('patient_name','id','').strip()
+    query = request.form.get('patient_name', '').strip()
     results = []
     if query:
         results = fetch_all(
-            "SELECT * FROM patients WHERE patient_name LIKE %s or id like %s ORDER BY patient_name",
-            (f'%{query}%',)
+            "SELECT * FROM patients WHERE patient_name LIKE %s OR id LIKE %s ORDER BY patient_name",
+            (f'%{query}%', f'%{query}%')
         )
     return render_template('patient_search_results.html', results=results, query=query)
 

@@ -17,6 +17,7 @@ CREATE TABLE users (
 CREATE TABLE patients (
     patient_id     VARCHAR(20)                      PRIMARY KEY,
     patient_name   VARCHAR(100)                     NOT NULL,
+    id             VARCHAR(20)                      NOT NULL UNIQUE,
     age            INT                              NOT NULL,
     gender         ENUM('Male', 'Female', 'Other')  NOT NULL,
     contact_number VARCHAR(15)                      NOT NULL,
@@ -57,27 +58,27 @@ CREATE TABLE patient_report (
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-INSERT INTO patients (patient_id, patient_name, age, gender, contact_number) VALUES
-('P000001', 'John Silva',            25, 'Male',   '0712345601'),
-('P000002', 'Nimal Perera',          32, 'Male',   '0712345602'),
-('P000003', 'Kamal Fernando',        41, 'Male',   '0712345603'),
-('P000004', 'Saman Wijesinghe',      29, 'Male',   '0712345604'),
-('P000005', 'Ruwan Jayasuriya',      35, 'Male',   '0712345605'),
-('P000006', 'Anjali Perera',         27, 'Female', '0712345606'),
-('P000007', 'Nadeesha Silva',        30, 'Female', '0712345607'),
-('P000008', 'Dilani Fernando',       38, 'Female', '0712345608'),
-('P000009', 'Harshini Peris',        24, 'Female', '0712345609'),
-('P000010', 'Tharindu Gunasekara',   33, 'Male',   '0712345610'),
-('P000011', 'Lakmal Perera',         45, 'Male',   '0712345611'),
-('P000012', 'Sachini Silva',         28, 'Female', '0712345612'),
-('P000013', 'Chathura Fernando',     36, 'Male',   '0712345613'),
-('P000014', 'Isuri Jayawardena',     22, 'Female', '0712345614'),
-('P000015', 'Ramesh Kumar',          31, 'Male',   '0712345615'),
-('P000016', 'Nirosha Perera',        40, 'Female', '0712345616'),
-('P000017', 'Kasun Madushan',        26, 'Male',   '0712345617'),
-('P000018', 'Piumi Fernando',        34, 'Female', '0712345618'),
-('P000019', 'Thilina Silva',         39, 'Male',   '0712345619'),
-('P000020', 'Ayesha Perera',         23, 'Female', '0712345620');
+INSERT INTO patients (patient_id, patient_name, id, age, gender, contact_number) VALUES
+('P000001', 'John Silva',            '900000001V', 25, 'Male',   '0712345601'),
+('P000002', 'Nimal Perera',          '900000002V', 32, 'Male',   '0712345602'),
+('P000003', 'Kamal Fernando',        '900000003V', 41, 'Male',   '0712345603'),
+('P000004', 'Saman Wijesinghe',      '900000004V', 29, 'Male',   '0712345604'),
+('P000005', 'Ruwan Jayasuriya',      '900000005V', 35, 'Male',   '0712345605'),
+('P000006', 'Anjali Perera',         '900000006V', 27, 'Female', '0712345606'),
+('P000007', 'Nadeesha Silva',        '900000007V', 30, 'Female', '0712345607'),
+('P000008', 'Dilani Fernando',       '900000008V', 38, 'Female', '0712345608'),
+('P000009', 'Harshini Peris',        '900000009V', 24, 'Female', '0712345609'),
+('P000010', 'Tharindu Gunasekara',   '900000010V', 33, 'Male',   '0712345610'),
+('P000011', 'Lakmal Perera',         '900000011V', 45, 'Male',   '0712345611'),
+('P000012', 'Sachini Silva',         '900000012V', 28, 'Female', '0712345612'),
+('P000013', 'Chathura Fernando',     '900000013V', 36, 'Male',   '0712345613'),
+('P000014', 'Isuri Jayawardena',     '900000014V', 22, 'Female', '0712345614'),
+('P000015', 'Ramesh Kumar',          '900000015V', 31, 'Male',   '0712345615'),
+('P000016', 'Nirosha Perera',        '900000016V', 40, 'Female', '0712345616'),
+('P000017', 'Kasun Madushan',        '900000017V', 26, 'Male',   '0712345617'),
+('P000018', 'Piumi Fernando',        '900000018V', 34, 'Female', '0712345618'),
+('P000019', 'Thilina Silva',         '900000019V', 39, 'Male',   '0712345619'),
+('P000020', 'Ayesha Perera',         '900000020V', 23, 'Female', '0712345620');
 
 
 INSERT INTO samples (sample_id, patient_id, sample_name, sample_type, test, collection_date, referring_doctor, referring_hospital) VALUES
