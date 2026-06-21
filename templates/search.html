@@ -20,11 +20,11 @@
 <section class="panel">
     <form method="POST" class = "form-grid"action="{{ url_for('sample_search_results') }}" class="form-grid">
 
-        <label class="full-width">Search by Sample ID or Sample Name
+        <label class="full-width" style="font-size: 18px;">Search by Sample ID or Sample Name
             <input type="search" name="query" placeholder="Enter Sample ID or Sample Name...">
         </label>
 
-        <label>Sample Type
+        <label style="font-size: 18px;"> Search by Sample Type
             <select name="sample_type">
                 <option value="">All Types</option>
                 <option value="Blood">Blood</option>
@@ -33,10 +33,12 @@
             </select>
         </label>
         <br>
-        <label>From Date
+        <label style="font-size: 18px;"> Search by Date Range </label>
+        <br>
+        <label>From 
             <input type="date" name="start_date">
         </label>
-        <label>To Date
+        <label>To 
             <input type="date" name="end_date">
         </label>
 

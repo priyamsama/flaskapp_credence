@@ -1,6 +1,7 @@
 import re
 import random
-
+import phonenumbers
+from phonenumbers.phonenumberutil import NumberParseException 
 from datetime import date, datetime
 from functools import wraps
 from flask import render_template, make_response
@@ -318,14 +319,13 @@ def edit_patient(patient_id):
         cur = mysql.connection.cursor()
         cur.execute("""
             UPDATE patients
-            SET patient_name = %s, age = %s, gender = %s, contact_number = %s, id = %s
+            SET patient_name = %s, age = %s, gender = %s, contact_number = %s
             WHERE patient_id = %s
         """, (
             request.form['patient_name'].strip(),
             request.form['age'],
             request.form['gender'],
             request.form['contact_number'].strip(),
-            request.form['id'].strip(),
             patient_id,
         ))
         mysql.connection.commit() 
@@ -577,18 +577,19 @@ def patient_search():
     return render_template('patient_search.html')
 
 
+
 @app.route('/patient/search/results', methods=['GET', 'POST'])
 @login_required
 def patient_search_results():
     query = request.form.get('patient_name', '').strip()
     results = []
     if query:
+        search_value = f'%{query}%'
         results = fetch_all(
             "SELECT * FROM patients WHERE patient_name LIKE %s OR id LIKE %s ORDER BY patient_name",
-            (f'%{query}%', f'%{query}%')
+            (search_value, search_value)
         )
     return render_template('patient_search_results.html', results=results, query=query)
-
 @app.route('/sample/search', methods=['GET'])
 @login_required
 def sample_search():
@@ -672,41 +673,42 @@ def reporting():
 @login_required
 def create_report():
     samples = fetch_all('SELECT sample_id, sample_name, sample_type, patient_id FROM samples ORDER BY sample_id')
-    #date formating for report pdf 
     now = datetime.now()
     formatted_now = now.strftime("%A, %B %d, %Y - %I:%M %p")
+
     if request.method == 'POST':
-        sample_id = request.form.get('sample_id', '').strip()
-        comments  = request.form.get('comments', '').strip()
-        signature_choice = request.form.get('signature', 'no')  # 'yes' or 'no'
+        raw_input     = request.form.get('sample_id', '').strip()
+        comments      = request.form.get('comments', '').strip()
+        signature_choice = request.form.get('signature', 'no')
 
         def render_error(msg):
             flash(msg, 'error')
             return render_template('report_create.html', samples=samples, report=None, mode='create')
 
-        if not sample_id:
+        if not raw_input:
             return render_error('Please select a sample.')
 
-        # fetch_one returns a dict, supports looking up by ID or Name
-        sample = fetch_one('SELECT * FROM samples WHERE sample_id = %s OR sample_name = %s', (sample_id, sample_id))
+        # Resolve by sample_id first, then fall back to sample_name
+        sample = fetch_one('SELECT * FROM samples WHERE sample_id = %s', (raw_input,))
+        if not sample:
+            sample = fetch_one('SELECT * FROM samples WHERE sample_name = %s', (raw_input,))
         if not sample:
             return render_error('Sample not found.')
 
-        sample_id = sample['sample_id']
-
+        # Now we always have the real sample_id from the DB row
+        sample_id  = sample['sample_id']
         patient_id = sample['patient_id']
+
         patient = fetch_one('SELECT * FROM patients WHERE patient_id = %s', (patient_id,))
         if not patient:
             return render_error('Patient not found.')
 
-        # Check if report already exists
         existing = fetch_one(
             'SELECT report_id FROM patient_report WHERE sample_id = %s', (sample_id,)
         )
 
         if existing:
             report_id = existing['report_id']
-            # if the sample id is already exist then it will updte thh commt section
             cur = mysql.connection.cursor()
             try:
                 cur.execute("""
@@ -735,10 +737,7 @@ def create_report():
                 return render_error('An unexpected error occurred while saving.')
             finally:
                 cur.close()
-        
-        
 
-        #download PDF
         with_signature = (signature_choice == 'yes')
         import os
         project_dir = os.path.dirname(os.path.abspath(__file__))
@@ -765,6 +764,7 @@ def create_report():
             return render_template('report_create.html', samples=samples, report=None, mode='create')
 
     return render_template('report_create.html', samples=samples, report=None, mode='create')
+
 
 # report edit for particular report id
 '''@app.route('/report/<report_id>/edit', methods=['GET', 'POST'])
@@ -852,6 +852,7 @@ def search_report():
         results = fetch_all(sql, tuple(params))
     print("Results:", results)
 
+    with_signature = request.args.get("signature") == "yes"
     return render_template(
         'report_search.html',
         results=results,
