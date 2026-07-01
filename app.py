@@ -200,11 +200,9 @@ def register_patient():
         """, (nic, number))
 
         if existing_patient:
-            
-            if existing_patient[0] == nic:
+            if existing_patient['id'] == nic:
                 return render_error('A patient with this NIC already exists.')
-            else:
-                return render_error('A patient with this contact number already exists.')
+            return render_error('A patient with this contact number already exists.')
 
         cur = mysql.connection.cursor()
         try:
@@ -282,7 +280,7 @@ def patient_update():
             if not re.match(r'^\d{10}$', update_value):
                 return render_error('Contact number must be exactly 10 digits long.')
         elif update_field in ['id', 'NIC']:
-            if not re.match(r'^\d{10}$', update_value):
+            if not re.match(r'^\d{12}$', update_value):
                 return render_error('enter a valid nic .')
 
 
